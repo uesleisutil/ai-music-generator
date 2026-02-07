@@ -21,6 +21,17 @@ on:
           - balanced
           - quality
           - experimental
+      resolution:
+        description: 'Video resolution'
+        required: true
+        default: 'hd'
+        type: choice
+        options:
+          - hd
+          - fhd
+          - 2k
+          - 4k
+          - youtube
 
 env:
   AWS_REGION: us-east-1
@@ -68,6 +79,10 @@ jobs:
             --prompt "${{ github.event.inputs.prompt }}" \
             --duration ${{ github.event.inputs.duration }} \
             --preset ${{ github.event.inputs.preset }} \
+            --resolution ${{ github.event.inputs.resolution }} \
+            --output-bucket ${{ steps.get-bucket.outputs.bucket_name }} \
+            --wait > job_output.txt 2>&1 || true
+            --preset ${{ github.event.inputs.preset }} \
             --output-bucket ${{ steps.get-bucket.outputs.bucket_name }} \
             --wait > job_output.txt 2>&1 || true
           
@@ -103,12 +118,25 @@ jobs:
               jobOutput = 'Error reading job output: ' + e.message;
             }
             
+            // Resolution labels
+            const resolutionLabels = {
+              'hd': '720p - 1280x720',
+              'fhd': '1080p - 1920x1080',
+              '2k': '1440p - 2560x1440',
+              '4k': '2160p - 3840x2160',
+              'youtube': '1080p - 1920x1080'
+            };
+            
+            const resolution = '${{ github.event.inputs.resolution }}';
+            const resolutionLabel = resolutionLabels[resolution] || resolution;
+            
             const summary = `## 🧪 Test Deployment Results
             
             ### Input Parameters
             - **Prompt**: ${{ github.event.inputs.prompt }}
             - **Duration**: ${{ github.event.inputs.duration }}s
             - **Preset**: ${{ github.event.inputs.preset }}
+            - **Resolution**: ${resolution.toUpperCase()} (${resolutionLabel})
             - **Job ID**: ${{ steps.submit-job.outputs.job_id }}
             - **Status**: ${{ job.status }}
             
