@@ -76,19 +76,10 @@ resource "aws_s3_bucket_versioning" "output_bucket" {
   }
 }
 
-# ECR Repository for Docker images
-resource "aws_ecr_repository" "app" {
-  name                 = var.ecr_repository_name
-  image_tag_mutability = "MUTABLE"
-  
-  image_scanning_configuration {
-    scan_on_push = true
-  }
-  
-  tags = {
-    Name    = var.project_name
-    Project = var.project_name
-  }
+# Use existing ECR Repository (created by GitHub Actions)
+# If it doesn't exist, the workflow will create it before Terraform runs
+data "aws_ecr_repository" "app" {
+  name = var.ecr_repository_name
 }
 
 # IAM Role for Batch Jobs
@@ -452,7 +443,7 @@ resource "aws_cloudwatch_log_group" "batch_logs" {
 # Outputs
 output "ecr_repository_url" {
   description = "ECR repository URL"
-  value       = aws_ecr_repository.app.repository_url
+  value       = data.aws_ecr_repository.app.repository_url
 }
 
 output "s3_bucket_name" {
