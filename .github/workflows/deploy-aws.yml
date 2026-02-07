@@ -51,17 +51,23 @@ jobs:
         id: tf-plan
         working-directory: ./terraform
         run: |
-          set +e
-          terraform plan -detailed-exitcode -no-color -out=tfplan
-          exitcode=$?
-          set -e
+          terraform plan -detailed-exitcode -no-color -out=tfplan || export exitcode=$?
+          
+          # Default to 0 if exitcode is not set
+          exitcode=${exitcode:-0}
           
           echo "exitcode=$exitcode" >> $GITHUB_OUTPUT
+          echo "Terraform Plan Exit Code: $exitcode"
           
+          # Exit code 0 = no changes, 1 = error, 2 = changes detected
           if [ $exitcode -eq 1 ]; then
-            echo "Terraform Plan Failed!"
+            echo "❌ Terraform Plan Failed!"
             exit 1
-          else 
+          elif [ $exitcode -eq 2 ]; then
+            echo "✅ Terraform Plan: Changes detected (will apply)"
+            exit 0
+          else
+            echo "✅ Terraform Plan: No changes detected"
             exit 0
           fi
 
