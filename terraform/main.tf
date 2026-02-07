@@ -209,6 +209,7 @@ resource "aws_iam_instance_profile" "ecs_instance_profile" {
 resource "aws_security_group" "batch_sg" {
   name        = "${var.project_name}-batch-sg"
   description = "Security group for Batch compute environment"
+  vpc_id      = aws_vpc.batch_vpc.id
   
   egress {
     from_port   = 0
@@ -270,7 +271,7 @@ resource "aws_batch_compute_environment" "gpu_spot" {
     
     security_group_ids = [aws_security_group.batch_sg.id]
     
-    subnets = data.aws_subnets.selected.ids
+    subnets = [aws_subnet.batch_subnet.id]
     
     launch_template {
       launch_template_id = aws_launch_template.batch_lt.id
@@ -286,18 +287,65 @@ resource "aws_batch_compute_environment" "gpu_spot" {
   depends_on = [aws_iam_role_policy_attachment.batch_service_policy]
 }
 
-# Get VPC (try default first, fallback to any available)
-data "aws_vpcs" "available" {}
-
-data "aws_vpc" "selected" {
-  id = length(data.aws_vpcs.available.ids) > 0 ? data.aws_vpcs.available.ids[0] : null
+# Create VPC for AWS Batch
+resource "aws_vpc" "batch_vpc" {
+  cidr_block           = "10.0.0.0/16"
+  enable_dns_hostnames = true
+  enable_dns_support   = true
+  
+  tags = {
+    Name    = "${var.project_name}-vpc"
+    Project = var.project_name
+  }
 }
 
-data "aws_subnets" "selected" {
-  filter {
-    name   = "vpc-id"
-    values = [data.aws_vpc.selected.id]
+# Internet Gateway
+resource "aws_internet_gateway" "batch_igw" {
+  vpc_id = aws_vpc.batch_vpc.id
+  
+  tags = {
+    Name    = "${var.project_name}-igw"
+    Project = var.project_name
   }
+}
+
+# Public Subnet
+resource "aws_subnet" "batch_subnet" {
+  vpc_id                  = aws_vpc.batch_vpc.id
+  cidr_block              = "10.0.1.0/24"
+  map_public_ip_on_launch = true
+  availability_zone       = data.aws_availability_zones.available.names[0]
+  
+  tags = {
+    Name    = "${var.project_name}-subnet"
+    Project = var.project_name
+  }
+}
+
+# Route Table
+resource "aws_route_table" "batch_rt" {
+  vpc_id = aws_vpc.batch_vpc.id
+  
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.batch_igw.id
+  }
+  
+  tags = {
+    Name    = "${var.project_name}-rt"
+    Project = var.project_name
+  }
+}
+
+# Route Table Association
+resource "aws_route_table_association" "batch_rta" {
+  subnet_id      = aws_subnet.batch_subnet.id
+  route_table_id = aws_route_table.batch_rt.id
+}
+
+# Get available AZs
+data "aws_availability_zones" "available" {
+  state = "available"
 }
 
 # Batch Job Queue
