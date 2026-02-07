@@ -17,28 +17,39 @@ Projeto open-source completo para gerar músicas com IA, criar capas artísticas
 
 ## 🚀 Quick Start
 
+### Teste Rápido (Recomendado)
+
 ```bash
 # Clone o repositório
-git clone https://github.com/SEU_USUARIO/ai-music-generator.git
+git clone https://github.com/uesleisutil/ai-music-generator.git
 cd ai-music-generator
 
-# Crie ambiente virtual
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-
-# Instale dependências
+# Instale dependências básicas
 pip install -r requirements.txt
 
 # Instale FFmpeg
 brew install ffmpeg  # macOS
 # sudo apt install ffmpeg  # Linux
 
-# Configure YouTube API (veja SETUP.md)
-# Coloque client_secrets.json na raiz
-
-# Gere sua primeira música!
-python pipeline.py --prompt "cozy lofi home music" --duration 30 --title "My First AI Music"
+# Teste o sistema (sem IA, rápido!)
+python pipeline_simple.py --prompt "cozy lofi music" --duration 30 --title "Test" --skip-upload
 ```
+
+✅ **Pronto!** Seus arquivos estarão em `output/`
+
+### Modo Completo com IA
+
+Para usar modelos de IA reais (requer GPU recomendada):
+
+```bash
+# Instalar modelos de IA (~10GB)
+pip install -r requirements-full.txt
+
+# Gerar música com IA
+python pipeline.py --prompt "cozy lofi home music" --duration 180 --title "My AI Music"
+```
+
+📖 **Guia completo:** [QUICKSTART.md](QUICKSTART.md)
 
 ## 📋 Requisitos
 

@@ -1,0 +1,19 @@
+# Full installation with AI models (requires GPU recommended)
+# Use this if you have a powerful machine and want full AI capabilities
+
+torch>=2.0.0
+torchaudio>=2.0.0
+transformers>=4.30.0
+diffusers>=0.21.0
+accelerate>=0.20.0
+audiocraft
+xformers
+Pillow>=10.0.0
+pydub>=0.25.1
+pyyaml>=6.0
+google-auth>=2.22.0
+google-auth-oauthlib>=1.0.0
+google-auth-httplib2>=0.1.0
+google-api-python-client>=2.95.0
+scipy>=1.10.0
+numpy>=1.24.0

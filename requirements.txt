@@ -1,13 +1,25 @@
-torch>=2.0.0
-torchaudio>=2.0.0
-transformers>=4.30.0
-audiocraft>=1.0.0
-diffusers>=0.21.0
-accelerate>=0.20.0
+# Core dependencies
+pyyaml>=6.0
+Pillow>=10.0.0
+numpy>=1.24.0
+
+# Audio processing
+pydub>=0.25.1
+scipy>=1.10.0
+
+# AI Models (optional - install separately if needed)
+# torch>=2.0.0
+# torchaudio>=2.0.0
+# transformers>=4.30.0
+# audiocraft>=1.0.0
+# diffusers>=0.21.0
+# accelerate>=0.20.0
+
+# YouTube API
 google-auth>=2.22.0
 google-auth-oauthlib>=1.0.0
 google-auth-httplib2>=0.1.0
 google-api-python-client>=2.95.0
-Pillow>=10.0.0
-pydub>=0.25.1
-pyyaml>=6.0
+
+# Optional: For better audio quality
+# librosa>=0.10.0
