@@ -387,7 +387,7 @@ resource "aws_batch_job_definition" "gpu_job" {
   platform_capabilities = ["EC2"]
   
   container_properties = jsonencode({
-    image = "${aws_ecr_repository.app.repository_url}:latest"
+    image = "${data.aws_ecr_repository.app.repository_url}:latest"
     
     resourceRequirements = [
       {
