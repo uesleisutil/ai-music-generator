@@ -16,7 +16,7 @@ jobs:
     name: Terraform Plan
     runs-on: ubuntu-latest
     outputs:
-      tfplanExitCode: ${{ steps.tf-plan.outputs.exitcode }}
+      tfplanExitCode: ${{ steps.set-exitcode.outputs.exitcode }}
     
     steps:
       - name: Checkout code
@@ -50,25 +50,35 @@ jobs:
       - name: Terraform Plan
         id: tf-plan
         working-directory: ./terraform
-        shell: bash {0}
+        continue-on-error: true
+        run: terraform plan -detailed-exitcode -no-color -out=tfplan
+      
+      - name: Set Plan Exit Code
+        id: set-exitcode
         run: |
-          terraform plan -detailed-exitcode -no-color -out=tfplan
-          exitcode=$?
+          # Get the exit code from the previous step
+          # 0 = no changes, 1 = error, 2 = changes detected
+          exitcode="${{ steps.tf-plan.outcome == 'success' && '0' || steps.tf-plan.outcome == 'failure' && '2' || '1' }}"
+          
+          # Actually, we need to check if the plan file was created and has changes
+          # If terraform plan succeeded but there are changes, outcome is 'failure' with continue-on-error
+          if [ "${{ steps.tf-plan.outcome }}" == "failure" ]; then
+            # Check if it's a real failure or just changes detected
+            if [ -f terraform/tfplan ]; then
+              exitcode="2"
+              echo "✅ Terraform Plan: Changes detected (will apply)"
+            else
+              exitcode="1"
+              echo "❌ Terraform Plan: Failed"
+              exit 1
+            fi
+          else
+            exitcode="0"
+            echo "✅ Terraform Plan: No changes detected"
+          fi
           
           echo "exitcode=$exitcode" >> $GITHUB_OUTPUT
           echo "Terraform Plan Exit Code: $exitcode"
-          
-          # Exit code 0 = no changes, 1 = error, 2 = changes detected
-          if [ $exitcode -eq 1 ]; then
-            echo "❌ Terraform Plan Failed!"
-            exit 1
-          elif [ $exitcode -eq 2 ]; then
-            echo "✅ Terraform Plan: Changes detected (will apply)"
-            exit 0
-          else
-            echo "✅ Terraform Plan: No changes detected"
-            exit 0
-          fi
 
       - name: Publish Terraform Plan
         uses: actions/upload-artifact@v4
@@ -91,7 +101,7 @@ jobs:
     name: Terraform Apply
     needs: [terraform-plan]
     runs-on: ubuntu-latest
-    if: needs.terraform-plan.outputs.tfplanExitCode == 2
+    if: needs.terraform-plan.outputs.tfplanExitCode == '2'
     
     steps:
       - name: Checkout code
