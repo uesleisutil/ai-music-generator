@@ -1,0 +1,21 @@
+# Configurações do Gerador de Música IA
+
+music:
+  model: "facebook/musicgen-small"  # small, medium, large
+  duration: 30  # segundos
+  sample_rate: 32000
+  
+image:
+  model: "stabilityai/stable-diffusion-2-1"
+  width: 1280
+  height: 720
+  steps: 30
+  
+youtube:
+  category: "10"  # Music
+  privacy: "public"  # public, private, unlisted
+  
+output:
+  directory: "output"
+  music_format: "wav"
+  image_format: "png"
