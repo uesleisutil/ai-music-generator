@@ -270,7 +270,7 @@ resource "aws_batch_compute_environment" "gpu_spot" {
     
     security_group_ids = [aws_security_group.batch_sg.id]
     
-    subnets = data.aws_subnets.default.ids
+    subnets = data.aws_subnets.selected.ids
     
     launch_template {
       launch_template_id = aws_launch_template.batch_lt.id
@@ -286,15 +286,17 @@ resource "aws_batch_compute_environment" "gpu_spot" {
   depends_on = [aws_iam_role_policy_attachment.batch_service_policy]
 }
 
-# Get default VPC subnets
-data "aws_vpc" "default" {
-  default = true
+# Get VPC (try default first, fallback to any available)
+data "aws_vpcs" "available" {}
+
+data "aws_vpc" "selected" {
+  id = length(data.aws_vpcs.available.ids) > 0 ? data.aws_vpcs.available.ids[0] : null
 }
 
-data "aws_subnets" "default" {
+data "aws_subnets" "selected" {
   filter {
     name   = "vpc-id"
-    values = [data.aws_vpc.default.id]
+    values = [data.aws_vpc.selected.id]
   }
 }
 
