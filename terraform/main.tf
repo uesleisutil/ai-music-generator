@@ -259,7 +259,7 @@ resource "aws_batch_compute_environment" "gpu_spot" {
     bid_percentage      = 100
     
     instance_role = aws_iam_instance_profile.ecs_instance_profile.arn
-    instance_types = [
+    instance_type = [
       "g4dn.xlarge",
       "g4dn.2xlarge"
     ]
