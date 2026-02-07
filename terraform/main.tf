@@ -24,7 +24,7 @@ variable "aws_region" {
 }
 
 variable "project_name" {
-  description = "Project name"
+  description = "Project name for resource tagging"
   type        = string
   default     = "ai-music-generator"
 }
