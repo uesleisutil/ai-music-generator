@@ -55,30 +55,28 @@ jobs:
       
       - name: Set Plan Exit Code
         id: set-exitcode
+        working-directory: ./terraform
         run: |
-          # Get the exit code from the previous step
-          # 0 = no changes, 1 = error, 2 = changes detected
-          exitcode="${{ steps.tf-plan.outcome == 'success' && '0' || steps.tf-plan.outcome == 'failure' && '2' || '1' }}"
-          
-          # Actually, we need to check if the plan file was created and has changes
-          # If terraform plan succeeded but there are changes, outcome is 'failure' with continue-on-error
-          if [ "${{ steps.tf-plan.outcome }}" == "failure" ]; then
-            # Check if it's a real failure or just changes detected
-            if [ -f terraform/tfplan ]; then
-              exitcode="2"
-              echo "✅ Terraform Plan: Changes detected (will apply)"
-            else
-              exitcode="1"
-              echo "❌ Terraform Plan: Failed"
-              exit 1
-            fi
-          else
-            exitcode="0"
-            echo "✅ Terraform Plan: No changes detected"
+          # Check if plan file exists and parse it to see if there are changes
+          if [ ! -f tfplan ]; then
+            echo "❌ Terraform Plan: Failed - no plan file created"
+            echo "exitcode=1" >> $GITHUB_OUTPUT
+            exit 1
           fi
           
-          echo "exitcode=$exitcode" >> $GITHUB_OUTPUT
-          echo "Terraform Plan Exit Code: $exitcode"
+          # Use terraform show to check if there are changes
+          terraform show -json tfplan > tfplan.json
+          
+          # Count resources to add/change/destroy
+          RESOURCE_CHANGES=$(cat tfplan.json | jq -r '.resource_changes | length')
+          
+          if [ "$RESOURCE_CHANGES" -gt 0 ]; then
+            echo "✅ Terraform Plan: Changes detected ($RESOURCE_CHANGES resources)"
+            echo "exitcode=2" >> $GITHUB_OUTPUT
+          else
+            echo "✅ Terraform Plan: No changes detected"
+            echo "exitcode=0" >> $GITHUB_OUTPUT
+          fi
 
       - name: Publish Terraform Plan
         uses: actions/upload-artifact@v4
