@@ -50,11 +50,10 @@ jobs:
       - name: Terraform Plan
         id: tf-plan
         working-directory: ./terraform
+        shell: bash {0}
         run: |
-          terraform plan -detailed-exitcode -no-color -out=tfplan || export exitcode=$?
-          
-          # Default to 0 if exitcode is not set
-          exitcode=${exitcode:-0}
+          terraform plan -detailed-exitcode -no-color -out=tfplan
+          exitcode=$?
           
           echo "exitcode=$exitcode" >> $GITHUB_OUTPUT
           echo "Terraform Plan Exit Code: $exitcode"
