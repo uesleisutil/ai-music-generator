@@ -6,10 +6,10 @@ music:
   sample_rate: 32000
   
 image:
-  model: "stabilityai/stable-diffusion-2-1"
+  model: "stabilityai/stable-diffusion-2-1"  # SD 2.1 para melhor qualidade
   width: 1280
   height: 720
-  steps: 30
+  steps: 50  # Mais steps = melhor qualidade
   
 youtube:
   category: "10"  # Music
