@@ -16,6 +16,8 @@ per-file-ignores =
     **/pipeline*.py:F811
     **/check_models.py:F541
     **/test_*.py:F541
+    **/create_video.py:F541
+    **/upload_youtube.py:F401,F541
 ignore =
     E501,
     W503,
