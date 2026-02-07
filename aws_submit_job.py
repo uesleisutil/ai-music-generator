@@ -14,6 +14,7 @@ def submit_job(
     prompt,
     duration=30,
     preset='balanced',
+    resolution='hd',
     job_queue='ai-music-generator-queue',
     job_definition='ai-music-generator-job',
     output_bucket=None,
@@ -35,6 +36,7 @@ def submit_job(
         'prompt': prompt,
         'duration': duration,
         'preset': preset,
+        'resolution': resolution,
         'output_bucket': output_bucket,
         'output_prefix': output_prefix
     }
@@ -47,6 +49,7 @@ def submit_job(
     print(f"Prompt: {prompt}")
     print(f"Duration: {duration}s")
     print(f"Preset: {preset}")
+    print(f"Resolution: {resolution.upper()}")
     print(f"Output: s3://{output_bucket}/{output_prefix}/{job_id}/")
     print("="*60 + "\n")
     
@@ -63,6 +66,7 @@ def submit_job(
                     '--prompt', prompt,
                     '--duration', str(duration),
                     '--preset', preset,
+                    '--resolution', resolution,
                     '--output-bucket', output_bucket,
                     '--output-prefix', output_prefix
                 ]
@@ -144,6 +148,32 @@ def main():
     parser.add_argument('--prompt', type=str, required=True, help='Music description')
     parser.add_argument('--duration', type=int, default=30, help='Duration in seconds')
     parser.add_argument('--preset', type=str, default='balanced', 
+                       choices=['quick', 'balanced', 'quality', 'experimental'],
+                       help='Quality preset')
+    parser.add_argument('--resolution', type=str, default='hd',
+                       choices=['hd', 'fhd', '2k', '4k', 'youtube'],
+                       help='Video resolution: hd (720p), fhd (1080p), 2k (1440p), 4k (2160p)')
+    parser.add_argument('--output-bucket', type=str, required=True, help='S3 bucket for output')
+    parser.add_argument('--output-prefix', type=str, default='output', help='S3 prefix for output')
+    parser.add_argument('--job-queue', type=str, default='ai-music-generator-queue', 
+                       help='AWS Batch job queue name')
+    parser.add_argument('--job-definition', type=str, default='ai-music-generator-job',
+                       help='AWS Batch job definition name')
+    parser.add_argument('--wait', action='store_true', help='Wait for job to complete')
+    
+    args = parser.parse_args()
+    
+    result = submit_job(
+        prompt=args.prompt,
+        duration=args.duration,
+        preset=args.preset,
+        resolution=args.resolution,
+        job_queue=args.job_queue,
+        job_definition=args.job_definition,
+        output_bucket=args.output_bucket,
+        output_prefix=args.output_prefix,
+        wait=args.wait
+    ) 
                        choices=['quick', 'balanced', 'quality', 'experimental'],
                        help='Quality preset')
     parser.add_argument('--output-bucket', type=str, required=True, help='S3 bucket for output')

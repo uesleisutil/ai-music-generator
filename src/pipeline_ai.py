@@ -24,10 +24,26 @@ def load_models_config():
 
 def run_pipeline_ai(prompt, duration=30, output_path="output/video", title=None, 
                     description="", tags=None, privacy="public", skip_upload=False, 
-                    music_model=None, image_model=None, preset=None):
+                    music_model=None, image_model=None, preset=None, resolution="hd"):
     """Runs the pipeline with AI models"""
 
     models_config = load_models_config()
+    
+    # Resolution presets
+    resolutions = {
+        "hd": (1280, 720),      # 720p HD
+        "fhd": (1920, 1080),    # 1080p Full HD
+        "2k": (2560, 1440),     # 2K QHD
+        "4k": (3840, 2160),     # 4K UHD
+        "youtube": (1920, 1080) # YouTube optimal
+    }
+    
+    if resolution not in resolutions:
+        print(f"⚠️  Unknown resolution '{resolution}', using 'hd'")
+        resolution = "hd"
+    
+    width, height = resolutions[resolution]
+    print(f"📐 Resolution: {resolution.upper()} ({width}x{height})")
 
     # Aplicar preset se especificado
     if preset:
@@ -68,7 +84,7 @@ def run_pipeline_ai(prompt, duration=30, output_path="output/video", title=None,
 
     # 2. Generate image
     print("\n📍 STEP 2/4: Generating cover image with AI...")
-    image_path = generate_image_ai(prompt, image_output, image_model)
+    image_path = generate_image_ai(prompt, image_output, image_model, width, height)
 
     if not image_path:
         print("❌ Failed to generate image")
@@ -126,12 +142,28 @@ def main():
     parser.add_argument('--image-model', type=str, help='Model de image (see list_models.py)')
     parser.add_argument('--preset', type=str, choices=['quick', 'balanced', 'quality', 'experimental'],
                         help='Model preset')
+    parser.add_argument('--resolution', type=str, default='hd', 
+                        choices=['hd', 'fhd', '2k', '4k', 'youtube'],
+                        help='Video resolution: hd (720p), fhd (1080p), 2k (1440p), 4k (2160p), youtube (1080p)')
 
     args = parser.parse_args()
 
     tags = args.tags.split(',') if args.tags else None
 
     run_pipeline_ai(
+        args.prompt,
+        args.duration,
+        "output/video",
+        args.title,
+        args.description,
+        tags,
+        args.privacy,
+        args.skip_upload,
+        args.music_model,
+        args.image_model,
+        args.preset,
+        args.resolution
+    )
         args.prompt,
         args.duration,
         "output/video",
