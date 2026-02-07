@@ -154,6 +154,31 @@ jobs:
         run: |
           echo "🧹 Cleaning up orphaned resources from previous partial deployments..."
           
+          # Delete Batch resources (must be done in order: job queue -> compute environment)
+          if aws batch describe-job-queues --job-queues ai-music-generator-queue --region $AWS_REGION 2>/dev/null | grep -q jobQueueName; then
+            echo "Disabling and deleting Batch job queue: ai-music-generator-queue"
+            aws batch update-job-queue --job-queue ai-music-generator-queue --state DISABLED --region $AWS_REGION || true
+            sleep 5
+            aws batch delete-job-queue --job-queue ai-music-generator-queue --region $AWS_REGION || true
+            echo "Waiting for job queue to be deleted..."
+            sleep 10
+          fi
+          
+          if aws batch describe-compute-environments --compute-environments ai-music-generator-gpu-spot --region $AWS_REGION 2>/dev/null | grep -q computeEnvironmentName; then
+            echo "Disabling and deleting Batch compute environment: ai-music-generator-gpu-spot"
+            aws batch update-compute-environment --compute-environment ai-music-generator-gpu-spot --state DISABLED --region $AWS_REGION || true
+            sleep 5
+            aws batch delete-compute-environment --compute-environment ai-music-generator-gpu-spot --region $AWS_REGION || true
+            echo "Waiting for compute environment to be deleted..."
+            sleep 15
+          fi
+          
+          # Deregister job definitions
+          for revision in $(aws batch describe-job-definitions --job-definition-name ai-music-generator-job --status ACTIVE --region $AWS_REGION --query 'jobDefinitions[].revision' --output text 2>/dev/null); do
+            echo "Deregistering job definition: ai-music-generator-job:$revision"
+            aws batch deregister-job-definition --job-definition ai-music-generator-job:$revision --region $AWS_REGION || true
+          done
+          
           # Delete IAM roles if they exist (detach policies first)
           for role in ai-music-generator-batch-job-role ai-music-generator-batch-service-role ai-music-generator-ecs-instance-role; do
             if aws iam get-role --role-name $role 2>/dev/null; then
