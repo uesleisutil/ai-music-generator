@@ -45,6 +45,8 @@ def process_job(job_config):
     duration = job_config.get('duration', 30)
     preset = job_config.get('preset', 'balanced')
     resolution = job_config.get('resolution', 'hd')
+    use_bedrock = job_config.get('use_bedrock', True)  # Default to Bedrock for better quality
+    bedrock_model = job_config.get('bedrock_model', 'sdxl')
     output_bucket = job_config['output_bucket']
     output_prefix = job_config.get('output_prefix', 'output')
     job_id = job_config.get('job_id', datetime.now().strftime('%Y%m%d_%H%M%S'))
@@ -53,6 +55,7 @@ def process_job(job_config):
     print(f"⏱️  Duration: {duration}s")
     print(f"🎯 Preset: {preset}")
     print(f"📐 Resolution: {resolution.upper()}")
+    print(f"☁️  Image Generator: {'AWS Bedrock (' + bedrock_model.upper() + ')' if use_bedrock else 'Local Models'}")
     print(f"📦 Output: s3://{output_bucket}/{output_prefix}/{job_id}/")
     print()
     
@@ -71,6 +74,8 @@ def process_job(job_config):
             output_path=local_output_base,
             preset=preset,
             resolution=resolution,
+            use_bedrock=use_bedrock,
+            bedrock_model=bedrock_model,
             skip_upload=True  # We'll upload to S3 instead
         )
         
@@ -166,6 +171,10 @@ def main():
     parser.add_argument('--resolution', type=str, default='hd', 
                         choices=['hd', 'fhd', '2k', '4k', 'youtube'],
                         help='Video resolution')
+    parser.add_argument('--use-bedrock', action='store_true', default=True,
+                        help='Use AWS Bedrock for image generation (default: True)')
+    parser.add_argument('--bedrock-model', type=str, default='sdxl', choices=['sdxl', 'titan'],
+                        help='Bedrock model: sdxl or titan')
     parser.add_argument('--output-bucket', type=str, help='S3 bucket for output')
     parser.add_argument('--output-prefix', type=str, default='output', help='S3 prefix for output')
     
@@ -197,6 +206,8 @@ def main():
             'duration': args.duration,
             'preset': args.preset,
             'resolution': args.resolution,
+            'use_bedrock': args.use_bedrock,
+            'bedrock_model': args.bedrock_model,
             'output_bucket': args.output_bucket,
             'output_prefix': args.output_prefix
         }

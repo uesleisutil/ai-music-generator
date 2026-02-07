@@ -15,6 +15,8 @@ def submit_job(
     duration=30,
     preset='balanced',
     resolution='hd',
+    use_bedrock=True,
+    bedrock_model='sdxl',
     job_queue='ai-music-generator-queue',
     job_definition='ai-music-generator-job',
     output_bucket=None,
@@ -37,6 +39,8 @@ def submit_job(
         'duration': duration,
         'preset': preset,
         'resolution': resolution,
+        'use_bedrock': use_bedrock,
+        'bedrock_model': bedrock_model,
         'output_bucket': output_bucket,
         'output_prefix': output_prefix
     }
@@ -50,6 +54,7 @@ def submit_job(
     print(f"Duration: {duration}s")
     print(f"Preset: {preset}")
     print(f"Resolution: {resolution.upper()}")
+    print(f"Image Generator: {'AWS Bedrock (' + bedrock_model.upper() + ')' if use_bedrock else 'Local Models'}")
     print(f"Output: s3://{output_bucket}/{output_prefix}/{job_id}/")
     print("="*60 + "\n")
     
@@ -67,6 +72,8 @@ def submit_job(
                     '--duration', str(duration),
                     '--preset', preset,
                     '--resolution', resolution,
+                    '--use-bedrock' if use_bedrock else '--no-use-bedrock',
+                    '--bedrock-model', bedrock_model,
                     '--output-bucket', output_bucket,
                     '--output-prefix', output_prefix
                 ]
@@ -153,6 +160,10 @@ def main():
     parser.add_argument('--resolution', type=str, default='hd',
                        choices=['hd', 'fhd', '2k', '4k', 'youtube'],
                        help='Video resolution: hd (720p), fhd (1080p), 2k (1440p), 4k (2160p)')
+    parser.add_argument('--use-bedrock', action='store_true', default=True,
+                       help='Use AWS Bedrock for image generation (default: True, better quality)')
+    parser.add_argument('--bedrock-model', type=str, default='sdxl', choices=['sdxl', 'titan'],
+                       help='Bedrock model: sdxl (Stable Diffusion XL) or titan (Amazon Titan)')
     parser.add_argument('--output-bucket', type=str, required=True, help='S3 bucket for output')
     parser.add_argument('--output-prefix', type=str, default='output', help='S3 prefix for output')
     parser.add_argument('--job-queue', type=str, default='ai-music-generator-queue', 
@@ -168,6 +179,8 @@ def main():
         duration=args.duration,
         preset=args.preset,
         resolution=args.resolution,
+        use_bedrock=args.use_bedrock,
+        bedrock_model=args.bedrock_model,
         job_queue=args.job_queue,
         job_definition=args.job_definition,
         output_bucket=args.output_bucket,

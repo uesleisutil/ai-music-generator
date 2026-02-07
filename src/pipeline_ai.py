@@ -14,6 +14,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from src.utils.upload_youtube import upload_video
 from src.utils.create_video import create_video
 from src.generators.generate_image_ai import generate_image_ai
+from src.generators.generate_image_bedrock import generate_image_bedrock
 from src.generators.generate_music_ai import generate_music_ai
 
 
@@ -24,7 +25,8 @@ def load_models_config():
 
 def run_pipeline_ai(prompt, duration=30, output_path="output/video", title=None, 
                     description="", tags=None, privacy="public", skip_upload=False, 
-                    music_model=None, image_model=None, preset=None, resolution="hd"):
+                    music_model=None, image_model=None, preset=None, resolution="hd",
+                    use_bedrock=False, bedrock_model="sdxl"):
     """Runs the pipeline with AI models"""
 
     models_config = load_models_config()
@@ -44,6 +46,9 @@ def run_pipeline_ai(prompt, duration=30, output_path="output/video", title=None,
     
     width, height = resolutions[resolution]
     print(f"📐 Resolution: {resolution.upper()} ({width}x{height})")
+    
+    if use_bedrock:
+        print(f"☁️  Using AWS Bedrock for image generation ({bedrock_model.upper()})")
 
     # Aplicar preset se especificado
     if preset:
@@ -84,7 +89,10 @@ def run_pipeline_ai(prompt, duration=30, output_path="output/video", title=None,
 
     # 2. Generate image
     print("\n📍 STEP 2/4: Generating cover image with AI...")
-    image_path = generate_image_ai(prompt, image_output, image_model, width, height)
+    if use_bedrock:
+        image_path = generate_image_bedrock(prompt, image_output, bedrock_model, width, height)
+    else:
+        image_path = generate_image_ai(prompt, image_output, image_model, width, height)
 
     if not image_path:
         print("❌ Failed to generate image")
@@ -145,6 +153,10 @@ def main():
     parser.add_argument('--resolution', type=str, default='hd', 
                         choices=['hd', 'fhd', '2k', '4k', 'youtube'],
                         help='Video resolution: hd (720p), fhd (1080p), 2k (1440p), 4k (2160p), youtube (1080p)')
+    parser.add_argument('--use-bedrock', action='store_true',
+                        help='Use AWS Bedrock for image generation (better quality)')
+    parser.add_argument('--bedrock-model', type=str, default='sdxl', choices=['sdxl', 'titan'],
+                        help='Bedrock model: sdxl (Stable Diffusion XL) or titan (Amazon Titan)')
 
     args = parser.parse_args()
 
@@ -162,7 +174,9 @@ def main():
         args.music_model,
         args.image_model,
         args.preset,
-        args.resolution
+        args.resolution,
+        args.use_bedrock,
+        args.bedrock_model
     )
         args.prompt,
         args.duration,

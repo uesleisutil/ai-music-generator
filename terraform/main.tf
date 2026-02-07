@@ -138,6 +138,29 @@ resource "aws_iam_role_policy" "batch_job_s3_policy" {
   })
 }
 
+# IAM Policy for Bedrock access
+resource "aws_iam_role_policy" "batch_job_bedrock_policy" {
+  name = "${var.project_name}-bedrock-policy"
+  role = aws_iam_role.batch_job_role.id
+  
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "bedrock:InvokeModel",
+          "bedrock:InvokeModelWithResponseStream"
+        ]
+        Resource = [
+          "arn:aws:bedrock:*::foundation-model/stability.stable-diffusion-xl-v1",
+          "arn:aws:bedrock:*::foundation-model/amazon.titan-image-generator-v1"
+        ]
+      }
+    ]
+  })
+}
+
 # IAM Policy for ECR access
 resource "aws_iam_role_policy_attachment" "batch_job_ecr_policy" {
   role       = aws_iam_role.batch_job_role.name
