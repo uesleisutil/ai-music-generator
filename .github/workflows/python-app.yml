@@ -29,6 +29,11 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-pip-
     
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y ffmpeg
+    
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
@@ -59,6 +64,10 @@ jobs:
     - name: Test simple pipeline (quick)
       run: |
         python aimusic simple --prompt "test" --duration 5 --skip-upload
+        test -f output/music.wav
+        test -f output/cover.png
+        test -f output/video.mp4
+        echo "✅ Pipeline test passed - all files generated"
 
   build-docs:
     runs-on: ubuntu-latest
