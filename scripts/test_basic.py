@@ -18,9 +18,12 @@ def test_project_structure():
         'LICENSE',
         'requirements.txt',
         'config.yaml',
-        'src/pipeline.py',
-        'src/generators/generate_music.py',
-        'src/generators/generate_image.py',
+        'src/pipeline_simple.py',
+        'src/pipeline_ai.py',
+        'src/generators/generate_music_simple.py',
+        'src/generators/generate_music_ai.py',
+        'src/generators/generate_image_simple.py',
+        'src/generators/generate_image_ai.py',
         'src/utils/create_video.py',
         'src/utils/upload_youtube.py',
         '.gitignore',
@@ -64,11 +67,12 @@ def test_python_syntax():
     print("\n🔍 Checking Python syntax...\n")
 
     python_files = [
-        'src/pipeline.py',
         'src/pipeline_simple.py',
         'src/pipeline_ai.py',
-        'src/generators/generate_music.py',
-        'src/generators/generate_image.py',
+        'src/generators/generate_music_simple.py',
+        'src/generators/generate_music_ai.py',
+        'src/generators/generate_image_simple.py',
+        'src/generators/generate_image_ai.py',
         'src/utils/create_video.py',
         'src/utils/upload_youtube.py',
     ]
@@ -194,7 +198,7 @@ def main():
         print("\n🚀 Next steps:")
         print("   1. Install dependencies: pip install -r requirements.txt")
         print("   2. Configure YouTube API (see SETUP.md)")
-        print("   3. Run: python pipeline.py --prompt 'test' --duration 30")
+        print("   3. Run: python aimusic simple --prompt 'test' --duration 30 --skip-upload")
         return 0
     else:
         print("\n⚠️  Some tests failed. Check errors above.")
