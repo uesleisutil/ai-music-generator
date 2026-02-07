@@ -401,6 +401,7 @@ terraform destroy
 ## 📚 Documentation
 
 - [QUICK_SETUP.md](QUICK_SETUP.md) - 5-minute setup guide
+- [docs/SECURITY.md](docs/SECURITY.md) - Security and access control
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) - Infrastructure diagrams
 - [docs/PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md) - File tree and components
 - [docs/AWS_SETUP.md](docs/AWS_SETUP.md) - Detailed AWS configuration

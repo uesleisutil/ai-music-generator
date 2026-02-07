@@ -40,8 +40,26 @@ jobs:
   submit-test-job:
     name: Submit Test Job
     runs-on: ubuntu-latest
+    # Only allow repository owner and collaborators to run this workflow
+    # This prevents unauthorized users from generating AWS costs
+    environment: production
     
     steps:
+      - name: Check if user is authorized
+        run: |
+          # Only repository owner and collaborators can run this workflow
+          echo "Workflow triggered by: ${{ github.actor }}"
+          echo "Repository owner: ${{ github.repository_owner }}"
+          
+          # This step will fail if secrets are not available (non-collaborators)
+          if [ -z "${{ secrets.AWS_ACCESS_KEY_ID }}" ]; then
+            echo "❌ Error: AWS credentials not available. Only repository collaborators can run this workflow."
+            exit 1
+          fi
+          
+          echo "✅ User authorized to run test deployment"
+      
+      
       - name: Checkout code
         uses: actions/checkout@v4
 
