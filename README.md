@@ -66,351 +66,65 @@ This project creates complete music videos from a simple text prompt:
 
 ## 🏗️ Architecture
 
-### High-Level Overview
-
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                     GitHub Actions                          │
-│  (CI/CD, Terraform, Docker Build/Push, Job Submission)     │
-└────────────────────┬────────────────────────────────────────┘
-                     │
-                     ▼
-┌─────────────────────────────────────────────────────────────┐
-│                      AWS Cloud                              │
-│                                                             │
-│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐ │
-│  │   ECR        │───▶│  AWS Batch   │───▶│     S3       │ │
-│  │  (Docker)    │    │  (GPU Jobs)  │    │  (Results)   │ │
-│  └──────────────┘    └──────┬───────┘    └──────────────┘ │
-│                             │                              │
-│                             ▼                              │
-│                    ┌─────────────────┐                     │
-│                    │  AWS Bedrock    │                     │
-│                    │  (SDXL/Titan)   │                     │
-│                    └─────────────────┘                     │
-│                                                             │
-│  ┌──────────────────────────────────────────────────────┐  │
-│  │  VPC (10.0.0.0/16)                                   │  │
-│  │  ├─ Subnet (10.0.1.0/24)                            │  │
-│  │  ├─ Internet Gateway                                │  │
-│  │  └─ Security Group                                  │  │
-│  └──────────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────┘
+GitHub Actions → AWS Batch (GPU) → AWS Bedrock → S3
+     ↓              ↓                  ↓          ↓
+  Terraform      g4dn.xlarge      SDXL/Titan   Results
+   (IaC)        (NVIDIA T4)      (Images)     (Videos)
 ```
 
-### Detailed Infrastructure
+**Components**: AWS Batch, EC2 (g4dn.xlarge), ECR, S3, Bedrock, VPC, CloudWatch, IAM
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                         GitHub Repository                           │
-│                                                                     │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐            │
-│  │   Source     │  │  Terraform   │  │  Dockerfile  │            │
-│  │   Code       │  │   (IaC)      │  │  (CUDA)      │            │
-│  └──────────────┘  └──────────────┘  └──────────────┘            │
-└────────────┬────────────────────────────────────────────────────────┘
-             │
-             │ git push
-             ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                       GitHub Actions Workflows                      │
-│                                                                     │
-│  ┌─────────────────────────────────────────────────────────────┐  │
-│  │  1. Deploy Workflow (on push to main)                       │  │
-│  │     ├─ Terraform Plan                                       │  │
-│  │     ├─ Terraform Apply (creates infrastructure)             │  │
-│  │     ├─ Docker Build (with CUDA support)                     │  │
-│  │     └─ Docker Push to ECR                                   │  │
-│  └─────────────────────────────────────────────────────────────┘  │
-│                                                                     │
-│  ┌─────────────────────────────────────────────────────────────┐  │
-│  │  2. Test Workflow (manual trigger)                          │  │
-│  │     ├─ Get S3 bucket name                                   │  │
-│  │     ├─ Submit job to AWS Batch                              │  │
-│  │     ├─ Wait for completion                                  │  │
-│  │     └─ Download results as artifact                         │  │
-│  └─────────────────────────────────────────────────────────────┘  │
-│                                                                     │
-│  ┌─────────────────────────────────────────────────────────────┐  │
-│  │  3. Validate Workflow (on PR)                               │  │
-│  │     ├─ Python syntax check                                  │  │
-│  │     ├─ Terraform validate                                   │  │
-│  │     └─ Dockerfile lint                                      │  │
-│  └─────────────────────────────────────────────────────────────┘  │
-└────────────┬────────────────────────────────────────────────────────┘
-             │
-             ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                          AWS Infrastructure                         │
-│                                                                     │
-│  ┌───────────────────────────────────────────────────────────────┐ │
-│  │  Region: us-east-1                                            │ │
-│  │                                                               │ │
-│  │  ┌─────────────────────────────────────────────────────────┐ │ │
-│  │  │  VPC (10.0.0.0/16)                                      │ │ │
-│  │  │                                                         │ │ │
-│  │  │  ┌───────────────────────────────────────────────────┐ │ │ │
-│  │  │  │  Public Subnet (10.0.1.0/24)                      │ │ │ │
-│  │  │  │                                                   │ │ │ │
-│  │  │  │  ┌─────────────────────────────────────────────┐ │ │ │ │
-│  │  │  │  │  AWS Batch Compute Environment          │ │ │ │ │
-│  │  │  │  │                                             │ │ │ │ │
-│  │  │  │  │  Type: MANAGED                              │ │ │ │ │
-│  │  │  │  │  Instance: g4dn.xlarge (NVIDIA T4)          │ │ │ │ │
-│  │  │  │  │  Pricing: SPOT (70% discount)               │ │ │ │ │
-│  │  │  │  │  Min vCPUs: 0                               │ │ │ │ │
-│  │  │  │  │  Max vCPUs: 16                              │ │ │ │ │
-│  │  │  │  │  Auto-scaling: Enabled                      │ │ │ │ │
-│  │  │  │  │                                             │ │ │ │ │
-│  │  │  │  │  ┌─────────────────────────────────────┐   │ │ │ │ │
-│  │  │  │  │  │  Job Queue                          │   │ │ │ │ │
-│  │  │  │  │  │  - ai-music-generator-queue         │   │ │ │ │ │
-│  │  │  │  │  │  - Priority: 1                      │   │ │ │ │ │
-│  │  │  │  │  │  - State: ENABLED                   │   │ │ │ │ │
-│  │  │  │  │  └─────────────────────────────────────┘   │ │ │ │ │
-│  │  │  │  │                                             │ │ │ │ │
-│  │  │  │  │  ┌─────────────────────────────────────┐   │ │ │ │ │
-│  │  │  │  │  │  Job Definition                     │   │ │ │ │ │
-│  │  │  │  │  │  - ai-music-generator-job           │   │ │ │ │ │
-│  │  │  │  │  │  - vCPUs: 4                         │   │ │ │ │ │
-│  │  │  │  │  │  - Memory: 15360 MB                 │   │ │ │ │ │
-│  │  │  │  │  │  - GPU: 1 (NVIDIA T4)               │   │ │ │ │ │
-│  │  │  │  │  │  - Image: ECR latest                │   │ │ │ │ │
-│  │  │  │  │  └─────────────────────────────────────┘   │ │ │ │ │
-│  │  │  │  └─────────────────────────────────────────────┘ │ │ │ │
-│  │  │  │                                                   │ │ │ │
-│  │  │  │  ┌─────────────────────────────────────────────┐ │ │ │ │
-│  │  │  │  │  Security Group                             │ │ │ │ │
-│  │  │  │  │  - Egress: All traffic (0.0.0.0/0)          │ │ │ │ │
-│  │  │  │  └─────────────────────────────────────────────┘ │ │ │ │
-│  │  │  └───────────────────────────────────────────────────┘ │ │ │
-│  │  │                                                         │ │ │
-│  │  │  ┌───────────────────────────────────────────────────┐ │ │ │
-│  │  │  │  Internet Gateway                                 │ │ │ │
-│  │  │  │  - Attached to VPC                                │ │ │ │
-│  │  │  │  - Route: 0.0.0.0/0 → IGW                         │ │ │ │
-│  │  │  └───────────────────────────────────────────────────┘ │ │ │
-│  │  └─────────────────────────────────────────────────────────┘ │ │
-│  └───────────────────────────────────────────────────────────────┘ │
-│                                                                     │
-│  ┌───────────────────────────────────────────────────────────────┐ │
-│  │  ECR (Elastic Container Registry)                             │ │
-│  │  - Repository: ai-music-generator                             │ │
-│  │  - Image Scanning: Enabled                                    │ │
-│  │  - Tags: latest, <commit-sha>                                 │ │
-│  │  - Size: ~8GB (CUDA + Python + AI libs)                       │ │
-│  └───────────────────────────────────────────────────────────────┘ │
-│                                                                     │
-│  ┌───────────────────────────────────────────────────────────────┐ │
-│  │  S3 Bucket                                                     │ │
-│  │  - Name: ai-music-gen-{account-id}-{random}                   │ │
-│  │  - Versioning: Enabled                                        │ │
-│  │  - Structure:                                                 │ │
-│  │    └─ output/                                                 │ │
-│  │       └─ {job-id}/                                            │ │
-│  │          ├─ music.wav                                         │ │
-│  │          ├─ cover.png                                         │ │
-│  │          ├─ video.mp4                                         │ │
-│  │          └─ metadata.json                                     │ │
-│  └───────────────────────────────────────────────────────────────┘ │
-│                                                                     │
-│  ┌───────────────────────────────────────────────────────────────┐ │
-│  │  AWS Bedrock                                                   │ │
-│  │  - Model: stability.stable-diffusion-xl-v1                    │ │
-│  │  - Model: amazon.titan-image-generator-v1                     │ │
-│  │  - Region: us-east-1                                          │ │
-│  │  - API: InvokeModel                                           │ │
-│  └───────────────────────────────────────────────────────────────┘ │
-│                                                                     │
-│  ┌───────────────────────────────────────────────────────────────┐ │
-│  │  CloudWatch Logs                                               │ │
-│  │  - Log Group: /aws/batch/ai-music-generator                   │ │
-│  │  - Retention: 7 days                                          │ │
-│  │  - Streams: Per job execution                                │ │
-│  └───────────────────────────────────────────────────────────────┘ │
-│                                                                     │
-│  ┌───────────────────────────────────────────────────────────────┐ │
-│  │  IAM Roles & Policies                                          │ │
-│  │  ├─ batch-job-role (for containers)                           │ │
-│  │  │  ├─ S3 access (read/write bucket)                          │ │
-│  │  │  ├─ Bedrock access (invoke models)                         │ │
-│  │  │  └─ ECR access (pull images)                               │ │
-│  │  ├─ batch-service-role (for Batch)                            │ │
-│  │  │  └─ AWSBatchServiceRole                                    │ │
-│  │  └─ ecs-instance-role (for EC2)                               │ │
-│  │     └─ AmazonEC2ContainerServiceforEC2Role                    │ │
-│  └───────────────────────────────────────────────────────────────┘ │
-└─────────────────────────────────────────────────────────────────────┘
-```
+**Processing Flow**:
+1. Music Generation (2-3 min) - MusicGen on GPU
+2. Image Generation (30-60s) - AWS Bedrock (SDXL/Titan)
+3. Video Composition (10-20s) - FFmpeg
+4. Upload to S3 (5-10s)
 
-### Processing Pipeline
+**Total Time**: 3-5 minutes | **Cost**: ~$0.06/video
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                         Job Submission                              │
-│  (GitHub Actions or CLI: aws_submit_job.py)                         │
-└────────────┬────────────────────────────────────────────────────────┘
-             │
-             │ Submit job with parameters:
-             │ - prompt: "cozy lofi coffee shop music"
-             │ - duration: 60s
-             │ - preset: balanced
-             │ - resolution: 4k
-             │ - bedrock_model: sdxl
-             ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                         AWS Batch Queue                             │
-│  Job queued and waiting for available compute                       │
-└────────────┬────────────────────────────────────────────────────────┘
-             │
-             │ Auto-scaling triggers
-             │ EC2 instance launch (g4dn.xlarge Spot)
-             ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                    Container Execution (GPU)                        │
-│  Docker container from ECR with CUDA support                        │
-│                                                                     │
-│  ┌─────────────────────────────────────────────────────────────┐  │
-│  │  STEP 1: Music Generation (2-3 min)                         │  │
-│  │  ┌───────────────────────────────────────────────────────┐  │  │
-│  │  │  • Load MusicGen model (1.5GB)                        │  │  │
-│  │  │  • Process prompt with GPU acceleration               │  │  │
-│  │  │  • Generate audio waveform (30-60s)                   │  │  │
-│  │  │  • Save as WAV (high quality, 44.1kHz)                │  │  │
-│  │  │  • Output: /app/output/{job-id}/music.wav             │  │  │
-│  │  └───────────────────────────────────────────────────────┘  │  │
-│  └─────────────────────────────────────────────────────────────┘  │
-│                            │                                        │
-│                            ▼                                        │
-│  ┌─────────────────────────────────────────────────────────────┐  │
-│  │  STEP 2: Image Generation (30-60s)                          │  │
-│  │  ┌───────────────────────────────────────────────────────┐  │  │
-│  │  │  • Enhance prompt for lofi/anime style                │  │  │
-│  │  │  • Call AWS Bedrock API (SDXL or Titan)               │  │  │
-│  │  │  • Generate image (3840x2160 for 4K)                  │  │  │
-│  │  │  • Apply style: lofi, anime, studio ghibli            │  │  │
-│  │  │  • Save as PNG                                        │  │  │
-│  │  │  • Output: /app/output/{job-id}/cover.png             │  │  │
-│  │  └───────────────────────────────────────────────────────┘  │  │
-│  └─────────────────────────────────────────────────────────────┘  │
-│                            │                                        │
-│                            ▼                                        │
-│  ┌─────────────────────────────────────────────────────────────┐  │
-│  │  STEP 3: Video Composition (10-20s)                         │  │
-│  │  ┌───────────────────────────────────────────────────────┐  │  │
-│  │  │  • Load audio (music.wav)                             │  │  │
-│  │  │  • Load image (cover.png)                             │  │  │
-│  │  │  • FFmpeg processing:                                 │  │  │
-│  │  │    - Video codec: libx264                             │  │  │
-│  │  │    - Audio codec: AAC (192k)                          │  │  │
-│  │  │    - Pixel format: yuv420p                            │  │  │
-│  │  │    - Duration: match audio length                     │  │  │
-│  │  │  • Save as MP4                                        │  │  │
-│  │  │  • Output: /app/output/{job-id}/video.mp4             │  │  │
-│  │  └───────────────────────────────────────────────────────┘  │  │
-│  └─────────────────────────────────────────────────────────────┘  │
-│                            │                                        │
-│                            ▼                                        │
-│  ┌─────────────────────────────────────────────────────────────┐  │
-│  │  STEP 4: Upload to S3 (5-10s)                               │  │
-│  │  ┌───────────────────────────────────────────────────────┐  │  │
-│  │  │  • Upload music.wav → S3                              │  │  │
-│  │  │  • Upload cover.png → S3                              │  │  │
-│  │  │  • Upload video.mp4 → S3                              │  │  │
-│  │  │  • Create metadata.json with job info                 │  │  │
-│  │  │  • Upload metadata.json → S3                          │  │  │
-│  │  │  • Location: s3://bucket/output/{job-id}/             │  │  │
-│  │  └───────────────────────────────────────────────────────┘  │  │
-│  └─────────────────────────────────────────────────────────────┘  │
-│                                                                     │
-│  Total Time: 3-5 minutes                                           │
-│  Total Cost: ~$0.06 per video                                      │
-└────────────┬────────────────────────────────────────────────────────┘
-             │
-             │ Job completed
-             │ Instance scales down to 0
-             ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                         Results in S3                               │
-│  s3://ai-music-gen-{account-id}-{random}/output/{job-id}/           │
-│  ├─ music.wav (5-10 MB)                                             │
-│  ├─ cover.png (2-5 MB for 4K)                                       │
-│  ├─ video.mp4 (10-20 MB)                                            │
-│  └─ metadata.json (1 KB)                                            │
-└─────────────────────────────────────────────────────────────────────┘
-```
-
-### Components
-
-- **AWS Batch**: Managed compute for running AI workloads
-- **EC2 (g4dn.xlarge)**: NVIDIA T4 GPU instances (Spot)
-- **ECR**: Docker container registry
-- **S3**: Object storage for outputs
-- **Bedrock**: Managed AI models (SDXL, Titan)
-- **VPC**: Isolated network environment
-- **CloudWatch**: Logging and monitoring
-- **IAM**: Security and permissions
+📖 **Detailed Architecture**: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 
 ---
 
 ## 🤖 AI Models
 
-### Music Generation
-
-| Model | Size | Quality | Speed | GPU | Description |
-|-------|------|---------|-------|-----|-------------|
-| **MusicGen Small** | 300MB | Basic | Fast | Optional | Quick generations, CPU-friendly |
-| **MusicGen Medium** ⭐ | 1.5GB | Good | Medium | Required | Best balance (default) |
-| **MusicGen Large** | 3.3GB | Excellent | Slow | Required | Highest quality |
-| **MusicGen Melody** | 1.5GB | Good | Medium | Required | Melody-focused |
-| **AudioLDM** | 1.2GB | Good | Fast | Optional | Text-to-audio |
-| **AudioLDM Large** | 2.5GB | Excellent | Medium | Required | Better AudioLDM |
-| **Riffusion** | 2GB | Good | Medium | Required | Unique style |
+### Music Generation (7 models)
+- **MusicGen Medium** ⭐ (default) - 1.5GB, GPU required, best balance
+- MusicGen Small/Large/Melody
+- AudioLDM, AudioLDM Large, Riffusion
 
 ### Image Generation
-
-| Model | Provider | Resolution | Quality | Cost/Image | Description |
-|-------|----------|------------|---------|------------|-------------|
-| **Stable Diffusion XL** ⭐ | AWS Bedrock | Up to 4K | Excellent | ~$0.04 | Best quality (default) |
-| **Amazon Titan** | AWS Bedrock | Up to 4K | Excellent | ~$0.008 | AWS native, cheaper |
-| **SD 2.1** | Local | Up to 4K | Good | Free | Self-hosted |
-| **SD XL Base** | Local | Up to 4K | Excellent | Free | Self-hosted, slower |
-| **Kandinsky 2.2** | Local | Up to 4K | Good | Free | Unique artistic style |
+- **Stable Diffusion XL** ⭐ (default) - AWS Bedrock, ~$0.04/image, best quality
+- **Amazon Titan** - AWS Bedrock, ~$0.008/image, cheaper alternative
+- Local models: SD 2.1, SD XL Base, Kandinsky 2.2 (free, self-hosted)
 
 ### Presets
+- **balanced** ⭐ (recommended) - musicgen-medium + sdxl, 3-5 min
+- **quick** - musicgen-small + wuerstchen, 2-3 min
+- **quality** - musicgen-large + sdxl, 5-8 min
+- **experimental** - riffusion + kandinsky, 4-6 min
 
-| Preset | Music Model | Image Model | Time | Quality | Use Case |
-|--------|-------------|-------------|------|---------|----------|
-| **quick** | musicgen-small | wuerstchen | 2-3 min | Basic | Fast testing |
-| **balanced** ⭐ | musicgen-medium | sdxl (Bedrock) | 3-5 min | Good | Recommended |
-| **quality** | musicgen-large | sdxl (Bedrock) | 5-8 min | Excellent | Best output |
-| **experimental** | riffusion | kandinsky | 4-6 min | Unique | Creative styles |
+📖 **Complete Model Reference**: [docs/MODELS.md](docs/MODELS.md)
 
 ---
 
 ## 💰 Pricing
 
-### Per Video Cost
+**Per Video**: ~$0.06 (SDXL) or ~$0.03 (Titan)
 
-| Component | Cost | Notes |
-|-----------|------|-------|
-| **Compute (GPU)** | ~$0.02 | g4dn.xlarge Spot (3-5 min) |
-| **Image (Bedrock SDXL)** | ~$0.04 | Stable Diffusion XL |
-| **Image (Bedrock Titan)** | ~$0.008 | Amazon Titan (cheaper) |
-| **Storage (S3)** | ~$0.001 | Per video stored |
-| **Total (SDXL)** | **~$0.06** | **6 cents per video** |
-| **Total (Titan)** | **~$0.03** | **3 cents per video** |
+| Component | Cost |
+|-----------|------|
+| Compute (GPU) | ~$0.02 |
+| Image (SDXL) | ~$0.04 |
+| Image (Titan) | ~$0.008 |
+| Storage (S3) | ~$0.001 |
 
-### Monthly Estimates
+**Monthly Estimates**: 10 videos/day = ~$18/month | 100 videos/day = ~$180/month
 
-| Usage | Videos/Day | Monthly Cost | Annual Cost |
-|-------|------------|--------------|-------------|
-| Light | 10 | ~$18 | ~$216 |
-| Medium | 50 | ~$90 | ~$1,080 |
-| Heavy | 100 | ~$180 | ~$2,160 |
-| Enterprise | 500 | ~$900 | ~$10,800 |
+**Note**: Using Spot Instances saves ~70% on compute costs.
 
-**Note**: Using Spot Instances saves ~70% on compute costs. Prices may vary by region.
+📖 **Detailed Pricing**: [docs/AWS_PRICING.md](docs/AWS_PRICING.md)
 
 ---
 
@@ -418,171 +132,42 @@ This project creates complete music videos from a simple text prompt:
 
 ```
 ai-music-generator/
-├── .github/
-│   ├── workflows/
-│   │   ├── deploy-aws.yml          # Main deployment pipeline
-│   │   ├── test-deployment.yml     # Test job submission
-│   │   ├── destroy-infrastructure.yml  # Cleanup workflow
-│   │   └── validate.yml            # PR validation
-│   ├── ISSUE_TEMPLATE/
-│   │   ├── bug_report.md
-│   │   └── feature_request.md
-│   ├── FUNDING.yml
-│   └── pull_request_template.md
-│
-├── docs/
-│   ├── AI_SETUP.md                 # AI models configuration
-│   ├── AWS_PRICING.md              # Detailed cost breakdown
-│   ├── AWS_SETUP.md                # Manual AWS setup
-│   ├── CODE_OF_CONDUCT.md
-│   ├── CONTRIBUTING.md
-│   └── MODELS.md                   # Complete model reference
-│
-├── examples/
-│   └── batch_generate.py           # Batch job submission example
-│
-├── scripts/
-│   ├── build_and_push.sh           # Docker build and ECR push
-│   └── deploy_aws.sh               # Manual Terraform deployment
-│
-├── src/
-│   ├── generators/
-│   │   ├── __init__.py
-│   │   ├── generate_music_ai.py    # MusicGen, AudioLDM, Riffusion
-│   │   ├── generate_image_ai.py    # Local Stable Diffusion models
-│   │   └── generate_image_bedrock.py  # AWS Bedrock (SDXL, Titan)
-│   ├── utils/
-│   │   ├── __init__.py
-│   │   ├── create_video.py         # FFmpeg video composition
-│   │   └── upload_youtube.py       # YouTube API integration
-│   ├── __init__.py
-│   └── pipeline_ai.py              # Main orchestration pipeline
-│
-├── terraform/
-│   └── main.tf                     # Complete infrastructure as code
-│
-├── .dockerignore
-├── .gitignore
-├── aws_batch_worker.py             # Container entrypoint for jobs
-├── aws_submit_job.py               # CLI for job submission
-├── Dockerfile                      # CUDA-enabled container
-├── LICENSE                         # MIT License
-├── models_config.yaml              # AI models configuration
-├── QUICK_SETUP.md                  # 5-minute setup guide
-├── README.md                       # This file
-├── requirements.txt                # Basic Python dependencies
-├── requirements-aws.txt            # AWS SDK (boto3)
-└── requirements-full.txt           # All AI dependencies
+├── src/                    # Python source code
+│   ├── generators/         # Music & image generation
+│   ├── utils/              # Video creation, YouTube upload
+│   └── pipeline_ai.py      # Main orchestration
+├── terraform/              # AWS infrastructure (IaC)
+├── .github/workflows/      # CI/CD pipelines
+├── docs/                   # Documentation
+├── examples/               # Usage examples
+├── scripts/                # Build and deploy scripts
+├── aws_batch_worker.py     # Container job processor
+├── aws_submit_job.py       # CLI for job submission
+├── Dockerfile              # CUDA-enabled container
+└── models_config.yaml      # AI models configuration
 ```
 
-### Key Files
-
-| File | Purpose | Lines | Description |
-|------|---------|-------|-------------|
-| `terraform/main.tf` | Infrastructure | ~400 | Complete AWS infrastructure definition |
-| `src/pipeline_ai.py` | Orchestration | ~200 | Main pipeline logic |
-| `aws_batch_worker.py` | Worker | ~200 | Container job processor |
-| `aws_submit_job.py` | CLI | ~150 | Job submission interface |
-| `Dockerfile` | Container | ~50 | CUDA + Python + AI libs |
-| `models_config.yaml` | Config | ~150 | 13 AI models configuration |
+📖 **Detailed Structure**: [docs/PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md)
 
 ---
 
 ## 🎯 Current Status
 
-### ✅ Completed Features
+**Production Ready** - All core features are complete and tested:
 
-- [x] **Music Generation** - 7 AI models (MusicGen, AudioLDM, Riffusion)
-- [x] **Image Generation** - AWS Bedrock (SDXL, Titan) + 6 local models
-- [x] **Video Composition** - FFmpeg with multiple resolutions (HD to 4K)
-- [x] **AWS Infrastructure** - Terraform with VPC, Batch, S3, ECR
-- [x] **GPU Acceleration** - NVIDIA T4 on g4dn.xlarge Spot instances
-- [x] **Auto-scaling** - 0 to 16 vCPUs based on demand
-- [x] **CI/CD Pipeline** - GitHub Actions for deploy, test, validate
-- [x] **Cost Optimization** - Spot instances, auto-shutdown, efficient caching
-- [x] **Monitoring** - CloudWatch Logs with 7-day retention
-- [x] **Security** - IAM roles, VPC isolation, encrypted S3
-- [x] **Documentation** - Complete guides and API reference
-- [x] **Batch Processing** - Multiple jobs in parallel
-- [x] **Resolution Options** - HD, FHD, 2K, 4K, YouTube-optimized
-- [x] **Bedrock Integration** - Managed AI models from AWS
-- [x] **Lofi Style** - Optimized prompts for aesthetic results
+✅ Music generation (7 AI models)  
+✅ Image generation (AWS Bedrock + local models)  
+✅ Video composition (HD to 4K)  
+✅ AWS infrastructure (Terraform)  
+✅ GPU acceleration (NVIDIA T4)  
+✅ Auto-scaling (0-16 vCPUs)  
+✅ CI/CD pipeline (GitHub Actions)  
+✅ Cost optimization (Spot instances)  
+✅ Monitoring (CloudWatch)  
+✅ Security (IAM, VPC)  
+✅ Documentation (complete guides)
 
-### 🚧 In Progress
-
-- [ ] **YouTube Auto-Upload** - Direct upload to YouTube channel
-- [ ] **Web Interface** - Simple UI for job submission
-- [ ] **Video Effects** - Transitions, animations, visualizers
-- [ ] **Multi-language** - Support for non-English prompts
-
-### 🔮 Planned Features
-
-- [ ] **Sora Integration** - Video generation with OpenAI Sora
-- [ ] **Music Variations** - Generate multiple versions from one prompt
-- [ ] **Style Transfer** - Apply different artistic styles
-- [ ] **Playlist Generation** - Create themed music collections
-- [ ] **Analytics Dashboard** - Usage stats and cost tracking
-- [ ] **API Endpoint** - REST API for programmatic access
-- [ ] **Mobile App** - iOS/Android app for job submission
-- [ ] **Real-time Preview** - Stream generation progress
-- [ ] **Collaborative Playlists** - Multi-user projects
-- [ ] **NFT Minting** - Mint generated videos as NFTs
-
-### 📊 Performance Metrics
-
-| Metric | Value | Notes |
-|--------|-------|-------|
-| **Average Generation Time** | 3-5 min | With GPU acceleration |
-| **Cost per Video** | $0.06 | Using SDXL + Spot instances |
-| **Max Resolution** | 4K (3840x2160) | Limited by Bedrock |
-| **Max Duration** | 5+ minutes | Limited by MusicGen |
-| **Concurrent Jobs** | 4 | With 16 vCPUs max |
-| **Success Rate** | 98%+ | Based on production usage |
-| **Cold Start Time** | 2-3 min | EC2 instance launch |
-| **Warm Start Time** | 10-20s | Container already running |
-
-### 🔧 Technical Stack
-
-| Layer | Technology | Version | Purpose |
-|-------|-----------|---------|---------|
-| **Language** | Python | 3.10 | Main programming language |
-| **Music AI** | MusicGen | Latest | Meta's music generation |
-| **Image AI** | Bedrock SDXL | v1 | AWS managed Stable Diffusion |
-| **Image AI** | Titan | v1 | AWS native image generation |
-| **Video** | FFmpeg | Latest | Video composition |
-| **Compute** | AWS Batch | - | Managed job scheduling |
-| **GPU** | NVIDIA T4 | 16GB | Deep learning acceleration |
-| **Container** | Docker | 20+ | Application packaging |
-| **CUDA** | 11.8 | - | GPU computing platform |
-| **IaC** | Terraform | 1.6+ | Infrastructure as code |
-| **CI/CD** | GitHub Actions | - | Automation pipeline |
-| **Storage** | S3 | - | Object storage |
-| **Registry** | ECR | - | Container images |
-| **Logs** | CloudWatch | - | Monitoring and debugging |
-| **Network** | VPC | - | Isolated networking |
-
-### 🌍 Supported Regions
-
-Currently deployed in:
-- ✅ **us-east-1** (N. Virginia) - Primary region
-
-Can be deployed in any AWS region with:
-- AWS Batch support
-- Bedrock availability
-- g4dn instance availability
-
-### 💡 Best Practices Implemented
-
-- ✅ **Infrastructure as Code** - All resources defined in Terraform
-- ✅ **Immutable Infrastructure** - Docker containers, no manual changes
-- ✅ **Auto-scaling** - Scale to zero when idle
-- ✅ **Cost Optimization** - Spot instances, efficient resource usage
-- ✅ **Security** - IAM roles, VPC isolation, no hardcoded credentials
-- ✅ **Monitoring** - CloudWatch logs for all jobs
-- ✅ **CI/CD** - Automated testing and deployment
-- ✅ **Documentation** - Comprehensive guides and examples
-- ✅ **Version Control** - Git for all code and configuration
-- ✅ **Modular Design** - Separate concerns, easy to extend
+**Performance**: 3-5 min/video | **Cost**: ~$0.06/video | **Success Rate**: 98%+
 
 ---
 
@@ -816,6 +401,8 @@ terraform destroy
 ## 📚 Documentation
 
 - [QUICK_SETUP.md](QUICK_SETUP.md) - 5-minute setup guide
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) - Infrastructure diagrams
+- [docs/PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md) - File tree and components
 - [docs/AWS_SETUP.md](docs/AWS_SETUP.md) - Detailed AWS configuration
 - [docs/AWS_PRICING.md](docs/AWS_PRICING.md) - Cost breakdown
 - [docs/AI_SETUP.md](docs/AI_SETUP.md) - AI models guide
