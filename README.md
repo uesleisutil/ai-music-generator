@@ -4,22 +4,24 @@
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![Open Source](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://opensource.org/)
 
-Projeto open-source completo para gerar músicas com IA, criar capas artísticas e fazer upload automático no YouTube. 100% gratuito!
+Projeto open-source completo para gerar músicas com IA, criar capas artísticas profissionais e fazer upload automático no YouTube. 100% gratuito!
 
 ## ✨ Features
 
 - 🎼 **Múltiplos Modelos de Música**: MusicGen, AudioLDM, Riffusion - escolha o melhor para você
-- 🎨 **Múltiplos Modelos de Imagem**: Stable Diffusion (1.5, 2.1, XL), Kandinsky, Würstchen, DeepFloyd
-- � **Presets Inteligentes**: Quick, Balanced, Quality, Eixperimental
+- 🎨 **Imagens de Alta Qualidade**: Stable Diffusion com prompts otimizados para estilo lofi/anime
+- 🎯 **Presets Inteligentes**: Quick, Balanced, Quality, Experimental
 - 🎬 **Criação de Vídeo**: Combina música + imagem automaticamente
 - 📤 **Upload Automático**: Publica direto no YouTube com um comando
 - ⚙️ **Totalmente Configurável**: Escolha modelos, qualidade e parâmetros
 - 💰 **100% Gratuito**: Todas as ferramentas são open-source
-- 🖥️ **Funciona em CPU**: Modelos otimizados para rodar sem GPU
+- 🖥️ **Funciona em CPU**: Modelos otimizados para rodar sem GPU (mais lento)
 
 ## 🚀 Quick Start
 
-### Teste Rápido (Recomendado)
+### Opção 1: Teste Rápido (Sem IA)
+
+Para testar o sistema rapidamente sem instalar modelos pesados:
 
 ```bash
 # Clone o repositório
@@ -33,165 +35,183 @@ pip install -r requirements.txt
 brew install ffmpeg  # macOS
 # sudo apt install ffmpeg  # Linux
 
-# Teste o sistema (sem IA, rápido!)
-python pipeline_simple.py --prompt "cozy lofi music" --duration 30 --title "Test" --skip-upload
+# Teste o sistema (gera imagens básicas)
+python aimusic simple --prompt "cozy lofi music" --duration 30 --skip-upload
 ```
 
-✅ **Pronto!** Seus arquivos estarão em `output/`
+⚠️ **Nota**: O modo simples gera imagens básicas/abstratas. Para qualidade profissional, use o modo IA abaixo.
 
-### Modo Completo com IA
+### Opção 2: Qualidade Profissional (Com IA) ⭐ RECOMENDADO
 
-Para usar modelos de IA reais (requer GPU recomendada):
+Para gerar imagens e músicas de **qualidade profissional** como canais lofi do YouTube:
 
 ```bash
-# Instalar modelos de IA (~10GB)
+# Instalar modelos de IA (~10-15GB)
 pip install -r requirements-full.txt
 
-# Gerar música com IA
-python pipeline.py --prompt "cozy lofi home music" --duration 180 --title "My AI Music"
+# Gerar música com IA (qualidade profissional!)
+python aimusic ai --prompt "cozy lofi coffee shop music" --duration 60 --skip-upload
 ```
 
-📖 **Guia completo:** [QUICKSTART.md](QUICKSTART.md)
+📖 **Guia completo de IA**: [docs/AI_SETUP.md](docs/AI_SETUP.md)
 
 ## 📋 Requisitos
 
+### Básico (Modo Simples)
 - Python 3.9+
 - FFmpeg
-- 8GB+ RAM (16GB recomendado)
-- GPU NVIDIA (opcional, mas acelera muito)
-- Conta Google (para YouTube API)
+- 4GB RAM
 
-## 🛠️ Instalação Detalhada
-
-Veja o guia completo em [SETUP.md](SETUP.md)
+### Recomendado (Modo IA)
+- Python 3.9+
+- FFmpeg
+- 16GB+ RAM
+- GPU NVIDIA com 6GB+ VRAM (opcional, mas acelera muito)
+- 20GB+ espaço em disco
 
 ## 📖 Como Usar
 
 ### Ver Modelos Disponíveis
 
 ```bash
-# Listar todos os modelos
-python list_models.py
+# Listar todos os modelos (13 opções gratuitas!)
+python aimusic models
 
 # Verificar modelos instalados
-python check_models.py
+python aimusic check
 ```
 
-### Pipeline Completo com IA
+### Gerar com IA (Recomendado)
 
 ```bash
-# Usar preset (recomendado)
-python pipeline_ai.py \
-  --prompt "cozy lofi music" \
+# Usar preset balanced (melhor custo-benefício)
+python aimusic ai \
+  --prompt "rainy night city lofi beats" \
   --preset balanced \
   --duration 180 \
   --skip-upload
 
 # Escolher modelos específicos
-python pipeline_ai.py \
-  --prompt "epic orchestral" \
-  --music-model musicgen-large \
-  --image-model sd-xl-base \
+python aimusic ai \
+  --prompt "cozy coffee shop jazz" \
+  --music-model musicgen-medium \
+  --image-model sd-2-1 \
   --duration 120 \
+  --skip-upload
+
+# Máxima qualidade
+python aimusic ai \
+  --prompt "peaceful forest ambience" \
+  --preset quality \
+  --duration 180 \
   --skip-upload
 ```
 
 ### Presets Disponíveis
 
-- `--preset quick` - Rápido, funciona em CPU
-- `--preset balanced` - Equilíbrio qualidade/velocidade (requer GPU)
+- `--preset quick` - Rápido, funciona em CPU (qualidade básica)
+- `--preset balanced` - Equilíbrio qualidade/velocidade ⭐ **RECOMENDADO**
 - `--preset quality` - Máxima qualidade (requer GPU potente)
 - `--preset experimental` - Modelos alternativos com estilos únicos
 
-### Uso Individual
+### Upload para YouTube
 
 ```bash
-# Apenas gerar música
-python generate_music_ai.py --prompt "jazz piano" --model musicgen-medium --duration 60
-
-# Apenas gerar imagem
-python generate_image_ai.py --prompt "jazz album cover" --model sd-2-1
-
-# Criar vídeo
-python create_video.py --audio output/music.wav --image output/cover.png
-
-# Upload para YouTube
-python upload_youtube.py --video output/video.mp4 --title "My Music"
+# Remova --skip-upload e configure YouTube API
+python aimusic ai --prompt "chill beats" --duration 180 --title "Chill Lofi Beats"
 ```
 
-📖 **Guia completo de modelos:** [MODELS.md](MODELS.md)
+📖 **Configurar YouTube**: [docs/SETUP.md](docs/SETUP.md)
 
-## ⚙️ Configuração
+## 🎯 Exemplos de Prompts
 
-Edite `config.yaml` para personalizar:
+### Café/Interior
+```bash
+python aimusic ai --prompt "cozy coffee shop with plants and warm lighting"
+```
 
-```yaml
-music:
-  model: "facebook/musicgen-small"  # small, medium, large
-  duration: 30
+### Cidade Noturna
+```bash
+python aimusic ai --prompt "rainy night city with neon lights and reflections"
+```
 
-image:
-  model: "stabilityai/stable-diffusion-2-1"
-  width: 1280
-  height: 720
-  steps: 30
+### Quarto/Estudo
+```bash
+python aimusic ai --prompt "bedroom with city view and desk setup lofi"
+```
 
-youtube:
-  privacy: "public"  # public, private, unlisted
+### Natureza
+```bash
+python aimusic ai --prompt "peaceful forest with sunlight through trees"
+```
+
+## 📊 Comparação: Simples vs IA
+
+| Feature | Modo Simples | Modo IA |
+|---------|-------------|---------|
+| Qualidade Imagem | ⭐⭐ Básica | ⭐⭐⭐⭐⭐ Profissional |
+| Qualidade Música | ⭐⭐ Sintética | ⭐⭐⭐⭐⭐ Natural |
+| Velocidade | ⚡⚡⚡ Segundos | ⚡ Minutos |
+| Requer GPU | ❌ Não | ⚠️ Recomendado |
+| Download | ❌ Não | ✅ 10-15GB |
+| Uso | Testes rápidos | Produção |
+
+## 🐛 Troubleshooting
+
+### Imagens ficam ruins/abstratas
+Você está usando o modo simples. Instale os modelos de IA:
+```bash
+pip install -r requirements-full.txt
+python aimusic ai --prompt "test" --duration 30 --skip-upload
+```
+
+### Erro: "No module named 'torch'"
+```bash
+pip install -r requirements-full.txt
+```
+
+### Muito lento
+Normal em CPU. Opções:
+- Use `--preset quick` para modelos menores
+- Reduza `--duration` para 30-60 segundos
+- Use GPU NVIDIA para acelerar 10x
+
+### FFmpeg não encontrado
+```bash
+# macOS
+brew install ffmpeg
+
+# Linux
+sudo apt install ffmpeg
 ```
 
 ## 📁 Estrutura do Projeto
 
 ```
 ai-music-generator/
-├── pipeline.py              # Script principal
-├── generate_music.py        # Geração de música
-├── generate_image.py        # Geração de imagens
-├── create_video.py          # Criação de vídeo
-├── upload_youtube.py        # Upload YouTube
-├── config.yaml              # Configurações
-├── requirements.txt         # Dependências Python
-├── SETUP.md                 # Guia de instalação
-├── CONTRIBUTING.md          # Guia de contribuição
-├── LICENSE                  # Licença MIT
-└── .gitignore              # Arquivos ignorados
+├── aimusic                 # CLI principal
+├── src/                    # Código fonte
+│   ├── generators/         # Geradores de música e imagem
+│   ├── utils/              # Utilitários (vídeo, upload)
+│   └── pipeline*.py        # Pipelines
+├── scripts/                # Scripts auxiliares
+├── docs/                   # Documentação completa
+└── tests/                  # Testes
 ```
 
-## 🎯 Exemplos de Prompts
+## 📚 Documentação
 
-- `"cozy lofi home music with rain sounds"`
-- `"epic cinematic orchestral trailer music"`
-- `"upbeat electronic dance music"`
-- `"calm acoustic guitar meditation"`
-- `"energetic rock guitar solo"`
-- `"smooth jazz saxophone evening"`
-
-## 🐛 Troubleshooting
-
-### Erro de memória
-- Use `musicgen-small` no config.yaml
-- Reduza a duração da música
-- Feche outros programas
-
-### FFmpeg não encontrado
-```bash
-# Verifique instalação
-ffmpeg -version
-
-# Reinstale se necessário
-brew install ffmpeg  # macOS
-```
-
-### Erro de autenticação YouTube
-- Verifique se `client_secrets.json` está correto
-- Delete `token.pickle` e tente novamente
-- Veja guia completo em SETUP.md
+- 📖 [Guia Rápido](docs/QUICKSTART.md)
+- 🤖 [Configuração de IA](docs/AI_SETUP.md) ⭐ **IMPORTANTE**
+- 🎨 [Guia de Modelos](docs/MODELS.md)
+- 🔧 [Instalação Detalhada](docs/SETUP.md)
+- 📁 [Estrutura do Projeto](docs/PROJECT_STRUCTURE.md)
 
 ## 🤝 Contribuindo
 
-Contribuições são bem-vindas! Veja [CONTRIBUTING.md](CONTRIBUTING.md) para detalhes.
+Contribuições são bem-vindas! Veja [CONTRIBUTING.md](docs/CONTRIBUTING.md) para detalhes.
 
-## 📝 Licença
+## � Licença
 
 Este projeto está sob a licença MIT. Veja [LICENSE](LICENSE) para mais detalhes.
 
@@ -208,8 +228,10 @@ Se este projeto te ajudou, considere dar uma estrela! ⭐
 
 ## 📧 Contato
 
-Tem dúvidas? Abra uma [issue](https://github.com/SEU_USUARIO/ai-music-generator/issues)!
+Tem dúvidas? Abra uma [issue](https://github.com/uesleisutil/ai-music-generator/issues)!
 
 ---
 
 **Feito com ❤️ e IA**
+
+**Dica**: Para qualidade profissional, sempre use `python aimusic ai` (não `simple`)!
