@@ -13,6 +13,53 @@ echo "   Region: $AWS_REGION"
 echo "   Profile: $AWS_PROFILE"
 echo ""
 
+# First, clean up Batch resources that might be using the VPCs
+echo "🗑️  Cleaning up Batch resources..."
+
+# Disable and delete job queues
+JOB_QUEUES=$(aws batch describe-job-queues \
+  --region $AWS_REGION \
+  --profile $AWS_PROFILE \
+  --query 'jobQueues[?starts_with(jobQueueName, `'$PROJECT_NAME'`)].jobQueueName' \
+  --output text)
+
+for queue in $JOB_QUEUES; do
+  echo "   Disabling job queue: $queue"
+  aws batch update-job-queue --job-queue $queue --state DISABLED --region $AWS_REGION --profile $AWS_PROFILE 2>/dev/null || true
+  sleep 2
+  echo "   Deleting job queue: $queue"
+  aws batch delete-job-queue --job-queue $queue --region $AWS_REGION --profile $AWS_PROFILE 2>/dev/null || true
+done
+
+# Wait for job queues to be deleted
+if [ ! -z "$JOB_QUEUES" ]; then
+  echo "   Waiting for job queues to be deleted..."
+  sleep 10
+fi
+
+# Disable and delete compute environments
+COMPUTE_ENVS=$(aws batch describe-compute-environments \
+  --region $AWS_REGION \
+  --profile $AWS_PROFILE \
+  --query 'computeEnvironments[?starts_with(computeEnvironmentName, `'$PROJECT_NAME'`)].computeEnvironmentName' \
+  --output text)
+
+for env in $COMPUTE_ENVS; do
+  echo "   Disabling compute environment: $env"
+  aws batch update-compute-environment --compute-environment $env --state DISABLED --region $AWS_REGION --profile $AWS_PROFILE 2>/dev/null || true
+  sleep 2
+  echo "   Deleting compute environment: $env"
+  aws batch delete-compute-environment --compute-environment $env --region $AWS_REGION --profile $AWS_PROFILE 2>/dev/null || true
+done
+
+# Wait for compute environments to be deleted
+if [ ! -z "$COMPUTE_ENVS" ]; then
+  echo "   Waiting for compute environments to be deleted..."
+  sleep 15
+fi
+
+echo ""
+
 # Get all VPCs for this project
 VPC_IDS=$(aws ec2 describe-vpcs \
   --region $AWS_REGION \
