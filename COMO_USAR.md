@@ -22,6 +22,12 @@ Preencha os campos:
   - `balanced` - Balanceado (3-5 min) ⭐ Recomendado
   - `quality` - Alta qualidade (5-8 min)
   - `experimental` - Estilos únicos (4-6 min)
+- **resolution**: Resolução do vídeo
+  - `hd` - 720p (1280x720) - Padrão, rápido
+  - `fhd` - 1080p (1920x1080) - Full HD
+  - `2k` - 1440p (2560x1440) - 2K QHD
+  - `4k` - 2160p (3840x2160) - 4K UHD ⭐ Melhor qualidade
+  - `youtube` - 1080p (1920x1080) - Otimizado YouTube
 
 ### Passo 3: Executar
 1. Clique em **"Run workflow"** (botão verde)
@@ -34,6 +40,7 @@ Preencha os campos:
 prompt: cozy lofi coffee shop music with rain sounds
 duration: 60
 preset: balanced
+resolution: 4k
 ```
 
 ---
@@ -61,6 +68,7 @@ python aws_submit_job.py \
   --prompt "cozy lofi coffee shop music" \
   --duration 60 \
   --preset balanced \
+  --resolution 4k \
   --output-bucket ai-music-gen-200093399689-a1b2c3d4 \
   --wait
 ```
@@ -69,6 +77,7 @@ python aws_submit_job.py \
 - `--prompt`: Descrição da música (obrigatório)
 - `--duration`: Duração em segundos (padrão: 30)
 - `--preset`: quick, balanced, quality, experimental (padrão: balanced)
+- `--resolution`: hd, fhd, 2k, 4k, youtube (padrão: hd)
 - `--output-bucket`: Nome do bucket S3 (obrigatório)
 - `--wait`: Aguarda o job terminar (opcional)
 
