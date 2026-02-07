@@ -26,7 +26,7 @@ def generate_music(prompt, duration=30, output_path="output/music"):
     # Configurar duração
     model.set_generation_params(duration=duration)
 
-    print(f"🎼 Gerando música: '{prompt}'...")
+    print(f"🎼 Generating music: '{prompt}'...")
     descriptions = [prompt]
 
     # Gerar música
@@ -36,7 +36,7 @@ def generate_music(prompt, duration=30, output_path="output/music"):
     os.makedirs(os.path.dirname(output_path) if os.path.dirname(output_path) else ".", exist_ok=True)
 
     # Salvar arquivo
-    print(f"💾 Salvando música em {output_path}.wav...")
+    print(f"💾 Saving music to {output_path}.wav...")
     audio_write(
         output_path,
         wav[0].cpu(),
@@ -45,14 +45,14 @@ def generate_music(prompt, duration=30, output_path="output/music"):
         loudness_compressor=True
     )
 
-    print(f"✅ Música gerada com sucesso!")
+    print(f"✅ Music gerada com sucesso!")
     return f"{output_path}.wav"
 
 
 def main():
     parser = argparse.ArgumentParser(description='Gerar música com IA')
-    parser.add_argument('--prompt', type=str, required=True, help='Descrição da música')
-    parser.add_argument('--duration', type=int, default=30, help='Duração em segundos')
+    parser.add_argument('--prompt', type=str, required=True, help='Music description')
+    parser.add_argument('--duration', type=int, default=30, help='Duration in seconds')
     parser.add_argument('--output', type=str, default='output/music', help='Caminho de saída')
 
     args = parser.parse_args()

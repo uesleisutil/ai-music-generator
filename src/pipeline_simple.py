@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Pipeline simplificado sem IA (para testes rápidos)
+Simplified pipeline without AI (for quick tests)
 """
 
 from src.utils.upload_youtube import upload_video
@@ -15,32 +15,32 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 def run_simple_pipeline(prompt, duration=30, title=None, description="", tags=None, privacy="public", skip_upload=False):
-    """Executa o pipeline simplificado"""
+    """Runs the simplified pipeline"""
 
     print("=" * 60)
-    print("🚀 PIPELINE SIMPLIFICADO (SEM IA)")
+    print("🚀 SIMPLIFIED PIPELINE (WITHOUT AI)")
     print("=" * 60)
-    print("⚠️  Este modo usa geradores simples para testes rápidos")
-    print("💡 Para IA real, instale: pip install -r requirements-full.txt")
+    print("⚠️  This mode uses simple generators for quick tests")
+    print("💡 For real AI, install: pip install -r requirements-full.txt")
     print("=" * 60)
 
-    # 1. Gerar música
-    print("\n📍 ETAPA 1/4: Gerando música...")
+    # 1. Generate music
+    print("\n📍 STEP 1/4: Generating music...")
     music_path = generate_simple_music(prompt, duration, "output/music")
 
-    # 2. Gerar imagem
-    print("\n📍 ETAPA 2/4: Gerando imagem de capa...")
+    # 2. Generate image
+    print("\n📍 STEP 2/4: Generating cover image...")
     image_path = generate_simple_image(prompt, "output/cover.png")
 
-    # 3. Criar vídeo
-    print("\n📍 ETAPA 3/4: Criando vídeo...")
+    # 3. Create video
+    print("\n📍 STEP 3/4: Creating video...")
     video_path = create_video(music_path, image_path, "output/video.mp4")
 
-    # 4. Upload para YouTube (opcional)
+    # 4. Upload to YouTube (optional)
     if not skip_upload:
-        print("\n📍 ETAPA 4/4: Fazendo upload para YouTube...")
+        print("\n📍 STEP 4/4: Uploading to YouTube...")
         video_title = title or f"{prompt.title()}"
-        video_description = description or f"Música de teste: {prompt}\n\nGerado com ferramentas open-source."
+        video_description = description or f"Test music: {prompt}\n\nGenerated with open-source tools."
         video_tags = tags or ["ai music", "test", "music"]
 
         try:
@@ -52,19 +52,19 @@ def run_simple_pipeline(prompt, duration=30, title=None, description="", tags=No
                 privacy=privacy
             )
         except FileNotFoundError:
-            print("⚠️  client_secrets.json não encontrado")
-            print("   Pulando upload. Veja SETUP.md para configurar YouTube API")
+            print("⚠️  client_secrets.json not found")
+            print("   Skipping upload. See SETUP.md to configure YouTube API")
             video_url = None
     else:
-        print("\n📍 ETAPA 4/4: Upload pulado (--skip-upload)")
+        print("\n📍 STEP 4/4: Upload skipped (--skip-upload)")
         video_url = None
 
     print("\n" + "=" * 60)
-    print("🎉 PIPELINE CONCLUÍDO!")
+    print("🎉 PIPELINE COMPLETED!")
     print("=" * 60)
-    print(f"🎵 Música: {music_path}")
-    print(f"🎨 Imagem: {image_path}")
-    print(f"🎬 Vídeo: {video_path}")
+    print(f"🎵 Music: {music_path}")
+    print(f"🎨 Image: {image_path}")
+    print(f"🎬 Video: {video_path}")
     if video_url:
         print(f"🔗 YouTube: {video_url}")
     print("=" * 60)
@@ -73,14 +73,14 @@ def run_simple_pipeline(prompt, duration=30, title=None, description="", tags=No
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Pipeline simplificado (sem IA)')
-    parser.add_argument('--prompt', type=str, required=True, help='Descrição da música')
-    parser.add_argument('--duration', type=int, default=30, help='Duração em segundos')
-    parser.add_argument('--title', type=str, help='Título do vídeo')
-    parser.add_argument('--description', type=str, default='', help='Descrição do vídeo')
-    parser.add_argument('--tags', type=str, help='Tags separadas por vírgula')
+    parser = argparse.ArgumentParser(description='Simplified pipeline (without AI)')
+    parser.add_argument('--prompt', type=str, required=True, help='Music description')
+    parser.add_argument('--duration', type=int, default=30, help='Duration in seconds')
+    parser.add_argument('--title', type=str, help='Video title')
+    parser.add_argument('--description', type=str, default='', help='Video description')
+    parser.add_argument('--tags', type=str, help='Comma-separated tags')
     parser.add_argument('--privacy', type=str, default='public', choices=['public', 'private', 'unlisted'])
-    parser.add_argument('--skip-upload', action='store_true', help='Pular upload para YouTube')
+    parser.add_argument('--skip-upload', action='store_true', help='Skip YouTube upload')
 
     args = parser.parse_args()
 

@@ -93,9 +93,9 @@ def upload_video(video_path, title, description="", tags=None, category="10", pr
 def main():
     parser = argparse.ArgumentParser(description='Upload de vídeo para YouTube')
     parser.add_argument('--video', type=str, required=True, help='Caminho do vídeo')
-    parser.add_argument('--title', type=str, required=True, help='Título do vídeo')
-    parser.add_argument('--description', type=str, default='', help='Descrição do vídeo')
-    parser.add_argument('--tags', type=str, help='Tags separadas por vírgula')
+    parser.add_argument('--title', type=str, required=True, help='Video title')
+    parser.add_argument('--description', type=str, default='', help='Video description')
+    parser.add_argument('--tags', type=str, help='Comma-separated tags')
     parser.add_argument('--privacy', type=str, default='public', choices=['public', 'private', 'unlisted'])
 
     args = parser.parse_args()

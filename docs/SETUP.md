@@ -1,17 +1,17 @@
-# Guia de Configuração
+# Setup Guide
 
-## 1. Instalar Dependências
+## 1. Install Dependencies
 
 ```bash
-# Criar ambiente virtual
+# Create virtual environment
 python -m venv venv
-source venv/bin/activate  # No Windows: venv\Scripts\activate
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 
-# Instalar pacotes
+# Install packages
 pip install -r requirements.txt
 ```
 
-## 2. Instalar FFmpeg
+## 2. Install FFmpeg
 
 ### macOS
 ```bash
@@ -25,46 +25,46 @@ sudo apt install ffmpeg
 ```
 
 ### Windows
-Baixe de: https://ffmpeg.org/download.html
+Download from: https://ffmpeg.org/download.html
 
-## 3. Configurar YouTube API
+## 3. Configure YouTube API
 
-1. Acesse: https://console.cloud.google.com/
-2. Crie um novo projeto
-3. Ative a "YouTube Data API v3"
-4. Crie credenciais OAuth 2.0
-5. Baixe o arquivo JSON e renomeie para `client_secrets.json`
-6. Coloque na raiz do projeto
+1. Go to: https://console.cloud.google.com/
+2. Create a new project
+3. Enable "YouTube Data API v3"
+4. Create OAuth 2.0 credentials
+5. Download the JSON file and rename to `client_secrets.json`
+6. Place in project root
 
-## 4. Primeiro Uso
+## 4. First Use
 
 ```bash
-# Teste simples (30 segundos)
+# Simple test (30 seconds)
 python pipeline.py --prompt "cozy lofi home music" --duration 30 --title "Cozy Lofi Music"
 ```
 
-Na primeira vez, um navegador abrirá para você autorizar o acesso ao YouTube.
+First time, a browser will open for you to authorize YouTube access.
 
-## Dicas
+## Tips
 
-- **GPU**: Se tiver GPU NVIDIA, instale CUDA para acelerar a geração
-- **Duração**: Comece com 30s para testar, depois aumente
-- **Modelos**: 
-  - `musicgen-small`: Mais rápido, menos qualidade
-  - `musicgen-medium`: Balanceado
-  - `musicgen-large`: Melhor qualidade, mais lento
+- **GPU**: If you have NVIDIA GPU, install CUDA to accelerate generation
+- **Duration**: Start with 30s to test, then increase
+- **Models**: 
+  - `musicgen-small`: Faster, less quality
+  - `musicgen-medium`: Balanced
+  - `musicgen-large`: Best quality, slower
 
 ## Troubleshooting
 
-### Erro de memória
-- Use `musicgen-small` no config.yaml
-- Reduza a duração da música
-- Feche outros programas
+### Memory error
+- Use `musicgen-small` in config.yaml
+- Reduce music duration
+- Close other programs
 
-### FFmpeg não encontrado
-- Verifique se está no PATH: `ffmpeg -version`
-- Reinstale o FFmpeg
+### FFmpeg not found
+- Check if it's in PATH: `ffmpeg -version`
+- Reinstall FFmpeg
 
-### Erro de autenticação YouTube
-- Verifique se `client_secrets.json` está correto
-- Delete `token.pickle` e tente novamente
+### YouTube authentication error
+- Check if `client_secrets.json` is correct
+- Delete `token.pickle` and try again

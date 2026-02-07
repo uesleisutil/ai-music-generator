@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Gerador de música simples usando síntese de áudio
-(Versão sem IA para testes rápidos)
+Simple music generator using audio synthesis
+(Version without AI for quick tests)
 """
 
 import argparse
@@ -20,10 +20,10 @@ def generate_simple_music(prompt, duration=30, output_path="output/music"):
     """
     Gera música simples usando síntese de áudio
     NOTA: Esta é uma versão simplificada para testes.
-    Para música real com IA, instale audiocraft: pip install audiocraft
+    For real music with AI, install audiocraft: pip install audiocraft
     """
-    print(f"⚠️  Usando gerador simples (sem IA)")
-    print(f"🎵 Gerando música de teste: '{prompt}' ({duration}s)...")
+    print(f"⚠️  Using simple generator (without AI)")
+    print(f"🎵 Generating music de teste: '{prompt}' ({duration}s)...")
 
     # Parâmetros
     sample_rate = 44100
@@ -79,19 +79,19 @@ def generate_simple_music(prompt, duration=30, output_path="output/music"):
 
     # Salvar arquivo
     output_file = f"{output_path}.wav"
-    print(f"💾 Salvando música em {output_file}...")
+    print(f"💾 Saving music to {output_file}...")
     wavfile.write(output_file, sample_rate, audio_int16)
 
-    print(f"✅ Música de teste gerada!")
-    print(f"💡 Para música real com IA, instale: pip install torch audiocraft")
+    print(f"✅ Music de teste gerada!")
+    print(f"💡 For real music with AI, install: pip install torch audiocraft")
 
     return output_file
 
 
 def main():
     parser = argparse.ArgumentParser(description='Gerar música simples (sem IA)')
-    parser.add_argument('--prompt', type=str, required=True, help='Descrição da música')
-    parser.add_argument('--duration', type=int, default=30, help='Duração em segundos')
+    parser.add_argument('--prompt', type=str, required=True, help='Music description')
+    parser.add_argument('--duration', type=int, default=30, help='Duration in seconds')
     parser.add_argument('--output', type=str, default='output/music', help='Caminho de saída')
 
     args = parser.parse_args()

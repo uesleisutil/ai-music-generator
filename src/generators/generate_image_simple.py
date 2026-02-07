@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Gerador de imagem estilo lofi/chill com cenários detalhados
-(Versão sem IA para testes rápidos)
+Lofi style image generator/chill com cenários detalhados
+(Version without AI for quick tests)
 """
 
 import argparse
@@ -224,8 +224,8 @@ def generate_simple_image(prompt, output_path="output/cover.png"):
     """
     Gera imagem estilo lofi/chill com cenários artísticos detalhados
     """
-    print(f"⚠️  Usando gerador simples (sem IA)")
-    print(f"🎨 Gerando imagem estilo lofi: '{prompt}'...")
+    print(f"⚠️  Using simple generator (without AI)")
+    print(f"🎨 Generating lofi style image: '{prompt}'...")
 
     width, height = 1280, 720
 
@@ -337,11 +337,11 @@ def generate_simple_image(prompt, output_path="output/cover.png"):
 
     # Salvar
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
-    print(f"💾 Salvando imagem em {output_path}...")
+    print(f"💾 Saving image to {output_path}...")
     img.save(output_path, quality=95)
 
-    print(f"✅ Imagem estilo lofi gerada!")
-    print(f"💡 Para imagens reais com IA, instale: pip install diffusers torch")
+    print(f"✅ Image estilo lofi gerada!")
+    print(f"💡 For real images with AI, install: pip install diffusers torch")
 
     return output_path
 

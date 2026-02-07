@@ -28,7 +28,7 @@ def generate_with_musicgen(model_id, prompt, duration, output_path):
     model = MusicGen.get_pretrained(model_id)
     model.set_generation_params(duration=duration)
 
-    print(f"🎼 Gerando música: '{prompt}'...")
+    print(f"🎼 Generating music: '{prompt}'...")
     wav = model.generate([prompt])
 
     print(f"💾 Salvando música...")
@@ -46,7 +46,7 @@ def generate_with_audioldm(model_id, prompt, duration, output_path):
     pipe = AudioLDMPipeline.from_pretrained(model_id, torch_dtype=torch.float16 if device == "cuda" else torch.float32)
     pipe = pipe.to(device)
 
-    print(f"🎼 Gerando música: '{prompt}'...")
+    print(f"🎼 Generating music: '{prompt}'...")
     audio = pipe(
         prompt,
         num_inference_steps=50,
@@ -59,7 +59,7 @@ def generate_with_audioldm(model_id, prompt, duration, output_path):
     output_file = f"{output_path}.wav"
     wavfile.write(output_file, sample_rate, audio)
 
-    print(f"💾 Música salva em {output_file}")
+    print(f"💾 Music salva em {output_file}")
     return output_file
 
 
@@ -92,7 +92,7 @@ def generate_music_ai(prompt, duration=30, output_path="output/music", model_key
     models_config = load_models_config()
 
     if model_key not in models_config['music_models']:
-        print(f"❌ Modelo '{model_key}' não encontrado!")
+        print(f"❌ Modelo '{model_key}' not found!")
         print(f"💡 Use: python list_models.py para ver modelos disponíveis")
         return None
 
@@ -100,7 +100,7 @@ def generate_music_ai(prompt, duration=30, output_path="output/music", model_key
     model_id = model_info['model_id']
 
     print(f"\n{'='*60}")
-    print(f"🎵 Gerando Música com IA")
+    print(f"🎵 Gerando Music com IA")
     print(f"{'='*60}")
     print(f"Modelo: {model_info['name']}")
     print(f"Qualidade: {model_info['quality']}")
@@ -134,19 +134,19 @@ def generate_music_ai(prompt, duration=30, output_path="output/music", model_key
 
 def main():
     parser = argparse.ArgumentParser(description='Gerar música com IA (múltiplos modelos)')
-    parser.add_argument('--prompt', type=str, required=True, help='Descrição da música')
-    parser.add_argument('--duration', type=int, default=30, help='Duração em segundos')
+    parser.add_argument('--prompt', type=str, required=True, help='Music description')
+    parser.add_argument('--duration', type=int, default=30, help='Duration in seconds')
     parser.add_argument('--output', type=str, default='output/music', help='Caminho de saída')
-    parser.add_argument('--model', type=str, default='musicgen-small', help='Modelo a usar (veja list_models.py)')
+    parser.add_argument('--model', type=str, default='musicgen-small', help='Modelo a usar (see list_models.py)')
 
     args = parser.parse_args()
 
     result = generate_music_ai(args.prompt, args.duration, args.output, args.model)
 
     if result:
-        print(f"\n✅ Música gerada com sucesso: {result}")
+        print(f"\n✅ Music gerada com sucesso: {result}")
     else:
-        print(f"\n❌ Falha ao gerar música")
+        print(f"\n❌ Failed to generate music")
 
 
 if __name__ == "__main__":

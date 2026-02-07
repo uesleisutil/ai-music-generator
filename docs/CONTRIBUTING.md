@@ -1,30 +1,30 @@
-# Contribuindo
+# Contributing
 
-Obrigado por considerar contribuir com este projeto! 
+Thank you for considering contributing to this project!
 
-## Como Contribuir
+## How to Contribute
 
-1. Fork o projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/MinhaFeature`)
-3. Commit suas mudanças (`git commit -m 'Adiciona MinhaFeature'`)
-4. Push para a branch (`git push origin feature/MinhaFeature`)
-5. Abra um Pull Request
+1. Fork the project
+2. Create a branch for your feature (`git checkout -b feature/MyFeature`)
+3. Commit your changes (`git commit -m 'Add MyFeature'`)
+4. Push to the branch (`git push origin feature/MyFeature`)
+5. Open a Pull Request
 
-## Diretrizes
+## Guidelines
 
-- Mantenha o código limpo e bem documentado
-- Adicione testes quando aplicável
-- Siga o estilo de código existente
-- Atualize a documentação conforme necessário
+- Keep code clean and well documented
+- Add tests when applicable
+- Follow existing code style
+- Update documentation as needed
 
-## Reportar Bugs
+## Report Bugs
 
-Abra uma issue descrevendo:
-- O que aconteceu
-- O que você esperava que acontecesse
-- Passos para reproduzir
-- Seu ambiente (OS, Python version, etc.)
+Open an issue describing:
+- What happened
+- What you expected to happen
+- Steps to reproduce
+- Your environment (OS, Python version, etc.)
 
-## Sugestões de Features
+## Feature Suggestions
 
-Abra uma issue com a tag `enhancement` descrevendo sua ideia!
+Open an issue with the `enhancement` tag describing your idea!

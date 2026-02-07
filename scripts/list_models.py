@@ -73,7 +73,7 @@ def list_presets():
             preset['description']
         ])
 
-    headers = ["Preset", "Modelo Música", "Modelo Imagem", "Descrição"]
+    headers = ["Preset", "Modelo Music", "Modelo Image", "Descrição"]
     print(tabulate(table_data, headers=headers, tablefmt="grid"))
 
     print("\n💡 Use: --preset quick|balanced|quality|experimental")

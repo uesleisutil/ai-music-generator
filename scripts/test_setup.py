@@ -65,7 +65,7 @@ def test_ffmpeg():
             print("  ✗ FFmpeg não está funcionando corretamente")
             return False
     except FileNotFoundError:
-        print("  ✗ FFmpeg não encontrado")
+        print("  ✗ FFmpeg not found")
         print("     Instale com: brew install ffmpeg")
         return False
     except Exception as e:
@@ -85,7 +85,7 @@ def test_config():
         print(f"     Modelo de imagem: {config['image']['model']}")
         return True
     except FileNotFoundError:
-        print("  ✗ config.yaml não encontrado")
+        print("  ✗ config.yaml not found")
         return False
     except Exception as e:
         print(f"  ✗ Erro ao ler config.yaml: {e}")
@@ -100,7 +100,7 @@ def test_youtube_credentials():
         print("  ✓ client_secrets.json encontrado")
         return True
     else:
-        print("  ⚠ client_secrets.json não encontrado")
+        print("  ⚠ client_secrets.json not found")
         print("     Necessário apenas para upload no YouTube")
         print("     Veja SETUP.md para instruções")
         return False

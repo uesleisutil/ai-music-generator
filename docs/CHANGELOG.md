@@ -1,25 +1,25 @@
 # Changelog
 
-Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
+All notable changes to this project will be documented in this file.
 
-O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
-e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [1.0.0] - 2026-02-07
 
-### Adicionado
-- Geração de música usando MusicGen (Meta)
-- Geração de capas usando Stable Diffusion
-- Criação automática de vídeos com FFmpeg
-- Upload automático para YouTube
-- Pipeline completo integrado
-- Configuração via YAML
-- Documentação completa
-- Exemplos de uso
-- Guia de instalação detalhado
+### Added
+- Music generation using MusicGen (Meta)
+- Cover generation using Stable Diffusion
+- Automatic video creation with FFmpeg
+- Automatic YouTube upload
+- Complete integrated pipeline
+- YAML configuration
+- Complete documentation
+- Usage examples
+- Detailed installation guide
 
-### Características
-- Suporte para CPU e GPU
-- Modelos configuráveis (small, medium, large)
-- Personalização de duração, qualidade e estilo
-- Upload com privacidade configurável (public, private, unlisted)
+### Features
+- CPU and GPU support
+- Configurable models (small, medium, large)
+- Duration, quality and style customization
+- Upload with configurable privacy (public, private, unlisted)

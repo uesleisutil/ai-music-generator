@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Teste básico da estrutura do projeto
+Basic project structure test
 """
 
 import os
@@ -8,8 +8,8 @@ import sys
 
 
 def test_project_structure():
-    """Verifica se todos os arquivos necessários existem"""
-    print("🔍 Verificando estrutura do projeto...\n")
+    """Checks if all required files exist"""
+    print("🔍 Checking project structure...\n")
 
     required_files = [
         'README.md',
@@ -31,15 +31,15 @@ def test_project_structure():
         if os.path.exists(file):
             print(f"  ✓ {file}")
         else:
-            print(f"  ✗ {file} - FALTANDO")
+            print(f"  ✗ {file} - MISSING")
             missing.append(file)
 
     return len(missing) == 0
 
 
 def test_github_structure():
-    """Verifica estrutura do GitHub"""
-    print("\n🔍 Verificando estrutura GitHub...\n")
+    """Checks GitHub structure"""
+    print("\n🔍 Checking GitHub structure...\n")
 
     github_files = [
         '.github/workflows/python-app.yml',
@@ -53,15 +53,15 @@ def test_github_structure():
         if os.path.exists(file):
             print(f"  ✓ {file}")
         else:
-            print(f"  ✗ {file} - FALTANDO")
+            print(f"  ✗ {file} - MISSING")
             missing.append(file)
 
     return len(missing) == 0
 
 
 def test_python_syntax():
-    """Verifica sintaxe dos arquivos Python"""
-    print("\n🔍 Verificando sintaxe Python...\n")
+    """Checks Python files syntax"""
+    print("\n🔍 Checking Python syntax...\n")
 
     python_files = [
         'src/pipeline.py',
@@ -76,88 +76,88 @@ def test_python_syntax():
     errors = []
     for file in python_files:
         if not os.path.exists(file):
-            print(f"  ⚠ {file} - NÃO ENCONTRADO")
+            print(f"  ⚠ {file} - NOT FOUND")
             continue
         try:
             with open(file, 'r') as f:
                 compile(f.read(), file, 'exec')
-            print(f"  ✓ {file} - Sintaxe OK")
+            print(f"  ✓ {file} - Syntax OK")
         except SyntaxError as e:
-            print(f"  ✗ {file} - ERRO DE SINTAXE: {e}")
+            print(f"  ✗ {file} - SYNTAX ERROR: {e}")
             errors.append(file)
 
     return len(errors) == 0
 
 
 def test_config_yaml():
-    """Verifica se o config.yaml é válido"""
-    print("\n🔍 Verificando config.yaml...\n")
+    """Checks if config.yaml is valid"""
+    print("\n🔍 Checking config.yaml...\n")
 
     try:
         import yaml
         with open('config.yaml', 'r') as f:
             config = yaml.safe_load(f)
 
-        # Verificar estrutura
+        # Check structure
         required_keys = ['music', 'image', 'youtube', 'output']
         for key in required_keys:
             if key in config:
-                print(f"  ✓ Seção '{key}' presente")
+                print(f"  ✓ Section '{key}' present")
             else:
-                print(f"  ✗ Seção '{key}' faltando")
+                print(f"  ✗ Section '{key}' missing")
                 return False
 
         return True
     except Exception as e:
-        print(f"  ✗ Erro ao ler config.yaml: {e}")
+        print(f"  ✗ Error reading config.yaml: {e}")
         return False
 
 
 def test_git_repo():
-    """Verifica se é um repositório git válido"""
-    print("\n🔍 Verificando repositório Git...\n")
+    """Checks if it's a valid git repository"""
+    print("\n🔍 Checking Git repository...\n")
 
     import subprocess
     try:
-        # Verificar se é um repo git
+        # Check if it's a git repo
         result = subprocess.run(['git', 'status'],
                                 capture_output=True,
                                 text=True)
         if result.returncode == 0:
-            print("  ✓ Repositório Git inicializado")
+            print("  ✓ Git repository initialized")
 
-            # Verificar remote
+            # Check remote
             result = subprocess.run(['git', 'remote', '-v'],
                                     capture_output=True,
                                     text=True)
             if 'github.com' in result.stdout:
-                print("  ✓ Remote GitHub configurado")
+                print("  ✓ GitHub remote configured")
                 remote_url = result.stdout.split('\n')[0].split('\t')[1].split(' ')[0]
                 print(f"     {remote_url}")
                 return True
             else:
-                print("  ⚠ Remote GitHub não configurado")
+                print("  ⚠ GitHub remote not configured")
                 return True
         else:
-            print("  ✗ Não é um repositório Git")
+            print("  ✗ Not a Git repository")
             return False
     except Exception as e:
-        print(f"  ✗ Erro ao verificar Git: {e}")
+        print(f"  ✗ Error checking Git: {e}")
         return False
 
 
 def main():
     print("=" * 60)
-    print("🧪 TESTE BÁSICO DO PROJETO")
+    print("🧪 BASIC PROJECT TEST")
     print("=" * 60)
     print()
 
     tests = [
-        ("Estrutura do Projeto", test_project_structure),
-        ("Estrutura GitHub", test_github_structure),
-        ("Sintaxe Python", test_python_syntax),
-        ("Configuração YAML", test_config_yaml),
-        ("Repositório Git", test_git_repo),
+        ("Project Structure", test_project_structure),
+        ("GitHub Structure", test_github_structure),
+        ("Python Syntax", test_python_syntax),
+        ("YAML Configuration", test_config_yaml),
+        ("Git Repository", test_git_repo),
     ]
 
     results = []
@@ -166,11 +166,11 @@ def main():
             result = test_func()
             results.append((name, result))
         except Exception as e:
-            print(f"\n❌ Erro ao executar teste '{name}': {e}")
+            print(f"\n❌ Error running test '{name}': {e}")
             results.append((name, False))
 
     print("\n" + "=" * 60)
-    print("📊 RESUMO DOS TESTES")
+    print("📊 TEST SUMMARY")
     print("=" * 60)
     print()
 
@@ -178,26 +178,26 @@ def main():
     total = len(results)
 
     for name, result in results:
-        status = "✅ PASSOU" if result else "❌ FALHOU"
+        status = "✅ PASSED" if result else "❌ FAILED"
         print(f"  {status} - {name}")
 
     print()
-    print(f"Total: {passed}/{total} testes passaram")
+    print(f"Total: {passed}/{total} tests passed")
     print("=" * 60)
 
     if passed == total:
-        print("\n🎉 TODOS OS TESTES PASSARAM!")
-        print("\n✅ Projeto está estruturado corretamente")
-        print("✅ Código Python sem erros de sintaxe")
-        print("✅ Configuração válida")
-        print("✅ Git e GitHub configurados")
-        print("\n🚀 Próximos passos:")
-        print("   1. Instale as dependências: pip install -r requirements.txt")
-        print("   2. Configure YouTube API (veja SETUP.md)")
-        print("   3. Execute: python pipeline.py --prompt 'test' --duration 30")
+        print("\n🎉 ALL TESTS PASSED!")
+        print("\n✅ Project is properly structured")
+        print("✅ Python code without syntax errors")
+        print("✅ Valid configuration")
+        print("✅ Git and GitHub configured")
+        print("\n🚀 Next steps:")
+        print("   1. Install dependencies: pip install -r requirements.txt")
+        print("   2. Configure YouTube API (see SETUP.md)")
+        print("   3. Run: python pipeline.py --prompt 'test' --duration 30")
         return 0
     else:
-        print("\n⚠️  Alguns testes falharam. Verifique os erros acima.")
+        print("\n⚠️  Some tests failed. Check errors above.")
         return 1
 
 

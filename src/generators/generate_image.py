@@ -54,10 +54,10 @@ def generate_image(prompt, output_path="output/cover.png"):
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
     # Salvar imagem
-    print(f"💾 Salvando imagem em {output_path}...")
+    print(f"💾 Saving image to {output_path}...")
     image.save(output_path)
 
-    print(f"✅ Imagem gerada com sucesso!")
+    print(f"✅ Image gerada com sucesso!")
     return output_path
 
 

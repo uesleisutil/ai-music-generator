@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Pipeline completo com múltiplos modelos de IA
+Complete pipeline with multiple AI models
 """
 
 from src.utils.upload_youtube import upload_video
@@ -23,21 +23,21 @@ def load_models_config():
 def run_ai_pipeline(prompt, duration=30, title=None, description="", tags=None,
                     privacy="public", skip_upload=False, music_model=None,
                     image_model=None, preset=None):
-    """Executa o pipeline com modelos de IA"""
+    """Runs the pipeline with AI models"""
 
     models_config = load_models_config()
 
     # Aplicar preset se especificado
     if preset:
         if preset not in models_config['presets']:
-            print(f"❌ Preset '{preset}' não encontrado!")
-            print(f"💡 Presets disponíveis: {', '.join(models_config['presets'].keys())}")
+            print(f"❌ Preset '{preset}' not found!")
+            print(f"💡 Available presets: {', '.join(models_config['presets'].keys())}")
             return None
 
         preset_config = models_config['presets'][preset]
         music_model = music_model or preset_config['music']
         image_model = image_model or preset_config['image']
-        print(f"\n🎯 Usando preset: {preset}")
+        print(f"\n🎯 Using preset: {preset}")
         print(f"   {preset_config['description']}")
 
     # Usar modelos padrão se não especificado
@@ -45,38 +45,38 @@ def run_ai_pipeline(prompt, duration=30, title=None, description="", tags=None,
     image_model = image_model or models_config['defaults']['image']
 
     print("=" * 60)
-    print("🚀 PIPELINE COM IA")
+    print("🚀 PIPELINE WITH AI")
     print("=" * 60)
-    print(f"🎵 Modelo de Música: {music_model}")
-    print(f"🎨 Modelo de Imagem: {image_model}")
+    print(f"🎵 Modelo de Music: {music_model}")
+    print(f"🎨 Modelo de Image: {image_model}")
     print("=" * 60)
 
     # 1. Gerar música
-    print("\n📍 ETAPA 1/4: Gerando música com IA...")
+    print("\n📍 STEP 1/4: Generating music com IA...")
     music_path = generate_music_ai(prompt, duration, "output/music", music_model)
 
     if not music_path:
-        print("❌ Falha ao gerar música")
+        print("❌ Failed to generate music")
         return None
 
     # 2. Gerar imagem
-    print("\n📍 ETAPA 2/4: Gerando imagem de capa com IA...")
+    print("\n📍 STEP 2/4: Generating cover image com IA...")
     image_path = generate_image_ai(prompt, "output/cover.png", image_model)
 
     if not image_path:
-        print("❌ Falha ao gerar imagem")
+        print("❌ Failed to generate image")
         return None
 
     # 3. Criar vídeo
-    print("\n📍 ETAPA 3/4: Criando vídeo...")
+    print("\n📍 STEP 3/4: Creating video...")
     video_path = create_video(music_path, image_path, "output/video.mp4")
 
     # 4. Upload para YouTube (opcional)
     video_url = None
     if not skip_upload:
-        print("\n📍 ETAPA 4/4: Fazendo upload para YouTube...")
+        print("\n📍 STEP 4/4: Uploading to YouTube...")
         video_title = title or f"{prompt.title()}"
-        video_description = description or f"Música gerada por IA: {prompt}\n\nModelos: {music_model} + {image_model}"
+        video_description = description or f"Music gerada por IA: {prompt}\n\nModelos: {music_model} + {image_model}"
         video_tags = tags or ["ai music", "ai generated", "music"]
 
         try:
@@ -88,17 +88,17 @@ def run_ai_pipeline(prompt, duration=30, title=None, description="", tags=None,
                 privacy=privacy
             )
         except FileNotFoundError:
-            print("⚠️  client_secrets.json não encontrado")
-            print("   Pulando upload. Veja SETUP.md para configurar YouTube API")
+            print("⚠️  client_secrets.json not found")
+            print("   Skipping upload. Veja SETUP.md to configure YouTube API")
     else:
-        print("\n📍 ETAPA 4/4: Upload pulado (--skip-upload)")
+        print("\n📍 STEP 4/4: Upload skipped (--skip-upload)")
 
     print("\n" + "=" * 60)
-    print("🎉 PIPELINE CONCLUÍDO!")
+    print("🎉 PIPELINE COMPLETED!")
     print("=" * 60)
-    print(f"🎵 Música: {music_path}")
-    print(f"🎨 Imagem: {image_path}")
-    print(f"🎬 Vídeo: {video_path}")
+    print(f"🎵 Music: {music_path}")
+    print(f"🎨 Image: {image_path}")
+    print(f"🎬 Video: {video_path}")
     if video_url:
         print(f"🔗 YouTube: {video_url}")
     print("=" * 60)
@@ -108,17 +108,17 @@ def run_ai_pipeline(prompt, duration=30, title=None, description="", tags=None,
 
 def main():
     parser = argparse.ArgumentParser(description='Pipeline completo com IA (múltiplos modelos)')
-    parser.add_argument('--prompt', type=str, required=True, help='Descrição da música')
-    parser.add_argument('--duration', type=int, default=30, help='Duração em segundos')
-    parser.add_argument('--title', type=str, help='Título do vídeo')
-    parser.add_argument('--description', type=str, default='', help='Descrição do vídeo')
-    parser.add_argument('--tags', type=str, help='Tags separadas por vírgula')
+    parser.add_argument('--prompt', type=str, required=True, help='Music description')
+    parser.add_argument('--duration', type=int, default=30, help='Duration in seconds')
+    parser.add_argument('--title', type=str, help='Video title')
+    parser.add_argument('--description', type=str, default='', help='Video description')
+    parser.add_argument('--tags', type=str, help='Comma-separated tags')
     parser.add_argument('--privacy', type=str, default='public', choices=['public', 'private', 'unlisted'])
-    parser.add_argument('--skip-upload', action='store_true', help='Pular upload para YouTube')
-    parser.add_argument('--music-model', type=str, help='Modelo de música (veja list_models.py)')
-    parser.add_argument('--image-model', type=str, help='Modelo de imagem (veja list_models.py)')
+    parser.add_argument('--skip-upload', action='store_true', help='Skip YouTube upload')
+    parser.add_argument('--music-model', type=str, help='Modelo de música (see list_models.py)')
+    parser.add_argument('--image-model', type=str, help='Modelo de imagem (see list_models.py)')
     parser.add_argument('--preset', type=str, choices=['quick', 'balanced', 'quality', 'experimental'],
-                        help='Preset de modelos')
+                        help='Model preset')
 
     args = parser.parse_args()
 

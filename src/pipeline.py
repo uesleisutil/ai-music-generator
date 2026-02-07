@@ -22,21 +22,21 @@ def run_pipeline(prompt, duration=30, title=None, description="", tags=None, pri
     print("=" * 60)
 
     # 1. Gerar música
-    print("\n📍 ETAPA 1/4: Gerando música...")
+    print("\n📍 STEP 1/4: Generating music...")
     music_path = generate_music(prompt, duration, "output/music")
 
     # 2. Gerar imagem
-    print("\n📍 ETAPA 2/4: Gerando imagem de capa...")
+    print("\n📍 STEP 2/4: Generating cover image...")
     image_path = generate_image(prompt, "output/cover.png")
 
     # 3. Criar vídeo
-    print("\n📍 ETAPA 3/4: Criando vídeo...")
+    print("\n📍 STEP 3/4: Creating video...")
     video_path = create_video(music_path, image_path, "output/video.mp4")
 
     # 4. Upload para YouTube
-    print("\n📍 ETAPA 4/4: Fazendo upload para YouTube...")
+    print("\n📍 STEP 4/4: Uploading to YouTube...")
     video_title = title or f"{prompt.title()}"
-    video_description = description or f"Música gerada por IA: {prompt}\n\nGerado com ferramentas open-source."
+    video_description = description or f"Music gerada por IA: {prompt}\n\nGerado com ferramentas open-source."
     video_tags = tags or ["ai music", "lofi", "music", "ai generated"]
 
     video_url = upload_video(
@@ -48,11 +48,11 @@ def run_pipeline(prompt, duration=30, title=None, description="", tags=None, pri
     )
 
     print("\n" + "=" * 60)
-    print("🎉 PIPELINE CONCLUÍDO COM SUCESSO!")
+    print("🎉 PIPELINE COMPLETED COM SUCESSO!")
     print("=" * 60)
-    print(f"🎵 Música: {music_path}")
-    print(f"🎨 Imagem: {image_path}")
-    print(f"🎬 Vídeo: {video_path}")
+    print(f"🎵 Music: {music_path}")
+    print(f"🎨 Image: {image_path}")
+    print(f"🎬 Video: {video_path}")
     print(f"🔗 YouTube: {video_url}")
     print("=" * 60)
 
@@ -61,11 +61,11 @@ def run_pipeline(prompt, duration=30, title=None, description="", tags=None, pri
 
 def main():
     parser = argparse.ArgumentParser(description='Pipeline completo de geração e upload')
-    parser.add_argument('--prompt', type=str, required=True, help='Descrição da música (ex: "cozy lofi home music")')
+    parser.add_argument('--prompt', type=str, required=True, help='Music description (ex: "cozy lofi home music")')
     parser.add_argument('--duration', type=int, default=30, help='Duração da música em segundos')
-    parser.add_argument('--title', type=str, help='Título do vídeo no YouTube')
-    parser.add_argument('--description', type=str, default='', help='Descrição do vídeo')
-    parser.add_argument('--tags', type=str, help='Tags separadas por vírgula')
+    parser.add_argument('--title', type=str, help='Video title no YouTube')
+    parser.add_argument('--description', type=str, default='', help='Video description')
+    parser.add_argument('--tags', type=str, help='Comma-separated tags')
     parser.add_argument('--privacy', type=str, default='public', choices=['public', 'private', 'unlisted'])
 
     args = parser.parse_args()

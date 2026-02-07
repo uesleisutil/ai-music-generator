@@ -1,38 +1,38 @@
-# 🤖 Configuração de IA - Guia Completo
+# 🤖 AI Setup - Complete Guide
 
-## Por que usar modelos de IA?
+## Why use AI models?
 
-O gerador simples (sem IA) cria imagens básicas com formas geométricas. Para obter imagens de **qualidade profissional** como nos exemplos de canais lofi do YouTube, você **precisa** instalar os modelos de IA.
+The simple generator (without AI) creates basic images with geometric shapes. To get **professional quality** images like lofi YouTube channel examples, you **need** to install AI models.
 
-## 📦 Instalação Rápida
+## 📦 Quick Installation
 
 ```bash
-# Instalar todas as dependências de IA
+# Install all AI dependencies
 pip install -r requirements-full.txt
 ```
 
-⚠️ **Atenção**: Isso vai baixar ~10-15GB de modelos. Certifique-se de ter:
-- Espaço em disco: 20GB+ livre
-- RAM: 16GB recomendado
-- GPU: NVIDIA com 6GB+ VRAM (recomendado, mas funciona em CPU)
+⚠️ **Warning**: This will download ~10-15GB of models. Make sure you have:
+- Disk space: 20GB+ free
+- RAM: 16GB recommended
+- GPU: NVIDIA with 6GB+ VRAM (recommended, but works on CPU)
 
-## 🎨 Modelos Recomendados
+## 🎨 Recommended Models
 
-### Para Melhor Qualidade (Padrão)
+### For Best Quality (Default)
 
-**Música**: `musicgen-medium`
-- Tamanho: 1.5GB
-- Qualidade: Boa
-- Velocidade: Média
-- GPU: Recomendada
+**Music**: `musicgen-medium`
+- Size: 1.5GB
+- Quality: Good
+- Speed: Medium
+- GPU: Recommended
 
-**Imagem**: `sd-2-1` (Stable Diffusion 2.1)
-- Tamanho: 5GB
-- Qualidade: Excelente
-- Velocidade: Média
-- GPU: Recomendada
+**Image**: `sd-2-1` (Stable Diffusion 2.1)
+- Size: 5GB
+- Quality: Excellent
+- Speed: Medium
+- GPU: Recommended
 
-### Para Máxima Qualidade
+### For Maximum Quality
 
 ```bash
 python aimusic ai \
@@ -41,11 +41,11 @@ python aimusic ai \
   --duration 180
 ```
 
-Usa:
+Uses:
 - `musicgen-large` (3.3GB)
 - `sd-xl-base` (7GB)
 
-### Para Testes Rápidos
+### For Quick Tests
 
 ```bash
 python aimusic ai \
@@ -54,23 +54,23 @@ python aimusic ai \
   --duration 30
 ```
 
-Usa:
+Uses:
 - `musicgen-small` (300MB)
 - `wuerstchen` (3GB)
 
-## 🚀 Uso com IA
+## 🚀 Using with AI
 
-### Comando Básico
+### Basic Command
 
 ```bash
-# Usar modelos padrão (recomendado)
+# Use default models (recommended)
 python aimusic ai --prompt "rainy night city lofi" --duration 60 --skip-upload
 ```
 
-### Escolher Modelos Específicos
+### Choose Specific Models
 
 ```bash
-# Música: medium, Imagem: SD 2.1
+# Music: medium, Image: SD 2.1
 python aimusic ai \
   --prompt "cozy coffee shop music" \
   --music-model musicgen-medium \
@@ -79,141 +79,141 @@ python aimusic ai \
   --skip-upload
 ```
 
-### Usar Presets
+### Use Presets
 
 ```bash
-# Preset balanced (melhor custo-benefício)
+# Balanced preset (best cost-benefit)
 python aimusic ai --prompt "chill beats" --preset balanced --duration 180
 
-# Preset quality (máxima qualidade)
+# Quality preset (maximum quality)
 python aimusic ai --prompt "jazz lofi" --preset quality --duration 180
 
-# Preset quick (testes rápidos)
+# Quick preset (quick tests)
 python aimusic ai --prompt "test" --preset quick --duration 30
 ```
 
-## 📊 Comparação: Simples vs IA
+## 📊 Comparison: Simple vs AI
 
-### Modo Simples (sem IA)
+### Simple Mode (without AI)
 ```bash
 python aimusic simple --prompt "lofi music" --duration 30
 ```
-- ✅ Rápido (segundos)
-- ✅ Não precisa GPU
-- ✅ Não precisa download
-- ❌ Qualidade básica
-- ❌ Imagens abstratas/geométricas
-- ❌ Música sintética simples
+- ✅ Fast (seconds)
+- ✅ No GPU needed
+- ✅ No download needed
+- ❌ Basic quality
+- ❌ Abstract/geometric images
+- ❌ Simple synthetic music
 
-### Modo IA
+### AI Mode
 ```bash
 python aimusic ai --prompt "lofi music" --duration 30
 ```
-- ✅ Qualidade profissional
-- ✅ Imagens realistas/artísticas
-- ✅ Música complexa e natural
-- ⚠️ Requer download de modelos
-- ⚠️ Mais lento (minutos)
-- ⚠️ GPU recomendada
+- ✅ Professional quality
+- ✅ Realistic/artistic images
+- ✅ Complex and natural music
+- ⚠️ Requires model download
+- ⚠️ Slower (minutes)
+- ⚠️ GPU recommended
 
-## 🎯 Exemplos de Prompts para IA
+## 🎯 AI Prompt Examples
 
-### Café/Interior
+### Cafe/Interior
 ```bash
 python aimusic ai --prompt "cozy coffee shop with plants and warm lighting" --duration 120
 ```
 
-### Cidade Noturna
+### Night City
 ```bash
 python aimusic ai --prompt "rainy night city with neon lights" --duration 180
 ```
 
-### Quarto/Estudo
+### Bedroom/Study
 ```bash
 python aimusic ai --prompt "bedroom with city view and desk setup" --duration 120
 ```
 
-### Natureza
+### Nature
 ```bash
 python aimusic ai --prompt "peaceful forest with sunlight through trees" --duration 180
 ```
 
 ## 🔧 Troubleshooting
 
-### Erro: "No module named 'torch'"
+### Error: "No module named 'torch'"
 ```bash
 pip install torch torchvision torchaudio
 ```
 
-### Erro: "No module named 'audiocraft'"
+### Error: "No module named 'audiocraft'"
 ```bash
 pip install audiocraft
 ```
 
-### Erro: "CUDA out of memory"
-Use modelos menores:
+### Error: "CUDA out of memory"
+Use smaller models:
 ```bash
 python aimusic ai --preset quick --prompt "test" --duration 30
 ```
 
-### Muito lento em CPU
-Normal! IA em CPU é lento. Opções:
-1. Use `--preset quick` para modelos menores
-2. Reduza `--duration` para 30-60 segundos
-3. Considere usar GPU (NVIDIA)
+### Too slow on CPU
+Normal! AI on CPU is slow. Options:
+1. Use `--preset quick` for smaller models
+2. Reduce `--duration` to 30-60 seconds
+3. Consider using GPU (NVIDIA)
 
-### Modelos não baixam
-Verifique:
-- Conexão com internet
-- Espaço em disco (20GB+)
+### Models don't download
+Check:
+- Internet connection
+- Disk space (20GB+)
 - Firewall/proxy
 
 ## 📈 Performance
 
-### Com GPU (NVIDIA RTX 3060, 12GB VRAM)
-- Música (30s): ~1-2 minutos
-- Imagem: ~30-60 segundos
-- Total: ~2-3 minutos
+### With GPU (NVIDIA RTX 3060, 12GB VRAM)
+- Music (30s): ~1-2 minutes
+- Image: ~30-60 seconds
+- Total: ~2-3 minutes
 
-### Sem GPU (CPU Intel i7)
-- Música (30s): ~5-10 minutos
-- Imagem: ~3-5 minutos
-- Total: ~10-15 minutos
+### Without GPU (CPU Intel i7)
+- Music (30s): ~5-10 minutes
+- Image: ~3-5 minutes
+- Total: ~10-15 minutes
 
-## 💡 Dicas
+## 💡 Tips
 
-1. **Primeira vez**: Use `--preset quick` para testar
-2. **Produção**: Use `--preset balanced` ou modelos padrão
-3. **Qualidade máxima**: Use `--preset quality`
-4. **Testes**: Use `--duration 30` para economizar tempo
-5. **GPU**: Instale CUDA Toolkit para acelerar
+1. **First time**: Use `--preset quick` to test
+2. **Production**: Use `--preset balanced` or default models
+3. **Maximum quality**: Use `--preset quality`
+4. **Tests**: Use `--duration 30` to save time
+5. **GPU**: Install CUDA Toolkit to accelerate
 
-## 🔗 Links Úteis
+## 🔗 Useful Links
 
-- [Instalar CUDA](https://developer.nvidia.com/cuda-downloads)
+- [Install CUDA](https://developer.nvidia.com/cuda-downloads)
 - [PyTorch](https://pytorch.org/get-started/locally/)
 - [Hugging Face](https://huggingface.co/)
 - [MusicGen](https://github.com/facebookresearch/audiocraft)
 - [Stable Diffusion](https://github.com/Stability-AI/stablediffusion)
 
-## ✅ Checklist de Instalação
+## ✅ Installation Checklist
 
-- [ ] Python 3.9+ instalado
-- [ ] pip atualizado (`pip install --upgrade pip`)
-- [ ] FFmpeg instalado (`brew install ffmpeg`)
-- [ ] requirements-full.txt instalado
-- [ ] 20GB+ espaço em disco livre
-- [ ] GPU NVIDIA (opcional, mas recomendado)
-- [ ] CUDA Toolkit instalado (se tiver GPU)
+- [ ] Python 3.9+ installed
+- [ ] pip updated (`pip install --upgrade pip`)
+- [ ] FFmpeg installed (`brew install ffmpeg`)
+- [ ] requirements-full.txt installed
+- [ ] 20GB+ free disk space
+- [ ] NVIDIA GPU (optional, but recommended)
+- [ ] CUDA Toolkit installed (if you have GPU)
 
-## 🎉 Resultado Esperado
+## 🎉 Expected Result
 
-Com os modelos de IA instalados, você terá:
-- 🎵 Música de qualidade profissional
-- 🎨 Imagens estilo anime/lofi realistas
-- 🎬 Vídeos prontos para YouTube
-- ⭐ Qualidade comparável a canais lofi populares
+With AI models installed, you will have:
+- 🎵 Professional quality music
+- 🎨 Realistic anime/lofi style images
+- 🎬 YouTube-ready videos
+- ⭐ Quality comparable to popular lofi channels
 
 ---
 
-**Próximo passo**: Execute `python aimusic ai --prompt "cozy lofi music" --duration 60 --skip-upload`
+**Next step**: Run `python aimusic ai --prompt "cozy lofi music" --duration 60 --skip-upload`

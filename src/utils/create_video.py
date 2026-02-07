@@ -10,9 +10,9 @@ import os
 def create_video(audio_path, image_path, output_path="output/video.mp4"):
     """Combina áudio e imagem em um vídeo"""
 
-    print(f"🎬 Criando vídeo...")
+    print(f"🎬 Creating video...")
     print(f"   Áudio: {audio_path}")
-    print(f"   Imagem: {image_path}")
+    print(f"   Image: {image_path}")
 
     # Criar diretório de saída
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
@@ -21,7 +21,7 @@ def create_video(audio_path, image_path, output_path="output/video.mp4"):
     command = [
         'ffmpeg',
         '-loop', '1',  # Loop na imagem
-        '-i', image_path,  # Imagem de entrada
+        '-i', image_path,  # Image de entrada
         '-i', audio_path,  # Áudio de entrada
         '-c:v', 'libx264',  # Codec de vídeo
         '-tune', 'stillimage',  # Otimização para imagem estática
@@ -35,7 +35,7 @@ def create_video(audio_path, image_path, output_path="output/video.mp4"):
 
     try:
         subprocess.run(command, check=True, capture_output=True)
-        print(f"✅ Vídeo criado com sucesso: {output_path}")
+        print(f"✅ Video criado com sucesso: {output_path}")
         return output_path
     except subprocess.CalledProcessError as e:
         print(f"❌ Erro ao criar vídeo: {e.stderr.decode()}")
