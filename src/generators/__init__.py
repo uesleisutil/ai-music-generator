@@ -1,8 +1,6 @@
 """Music and image generators"""
-from .generate_music_simple import generate_simple_music
-from .generate_image_simple import generate_simple_image
 
-__all__ = ['generate_simple_music', 'generate_simple_image']
+__all__ = []
 
 try:
     from .generate_music_ai import generate_music_ai

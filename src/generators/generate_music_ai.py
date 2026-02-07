@@ -14,11 +14,6 @@ def load_models_config():
         return yaml.safe_load(f)
 
 
-def load_config():
-    with open('config.yaml', 'r') as f:
-        return yaml.safe_load(f)
-
-
 def generate_with_musicgen(model_id, prompt, duration, output_path):
     """Generates music using MusicGen"""
     import torch

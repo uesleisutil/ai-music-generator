@@ -75,22 +75,9 @@ jobs:
           script: |
             const output = `#### Terraform Plan 📖\`${{ steps.tf-plan.outcome }}\`
             
-            <details><summary>Show Plan</summary>
-            
-            \`\`\`terraform
-            ${{ steps.tf-plan.outputs.stdout }}
-            \`\`\`
-            
-            </details>
-            
             *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Workflow: \`${{ github.workflow }}\`*`;
             
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: output
-            })
+            core.summary.addRaw(output).write();
 
   terraform-apply:
     name: Terraform Apply
@@ -182,7 +169,14 @@ jobs:
             --job-definition-name ai-music-generator-job \
             --status ACTIVE \
             --query 'jobDefinitions[0]' \
-            --output json)
+            --output json 2>/dev/null || echo "{}")
+          
+          # Check if job definition exists
+          if [ "$JOB_DEF" = "{}" ] || [ -z "$JOB_DEF" ]; then
+            echo "⚠️  Job definition not found or not active yet. Skipping update."
+            echo "The job definition will use the 'latest' tag automatically."
+            exit 0
+          fi
           
           # Update image in container properties
           CONTAINER_PROPS=$(echo $JOB_DEF | jq --arg IMAGE "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" \
@@ -194,6 +188,8 @@ jobs:
             --type container \
             --platform-capabilities EC2 \
             --container-properties "$CONTAINER_PROPS"
+          
+          echo "✅ Job definition updated with new image"
 
   deployment-summary:
     name: Deployment Summary

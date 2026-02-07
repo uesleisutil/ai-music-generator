@@ -3,16 +3,18 @@
 Complete pipeline with multiple AI models
 """
 
-from src.utils.upload_youtube import upload_video
-from src.utils.create_video import create_video
-from src.generators.generate_image_ai import generate_image_ai
-from src.generators.generate_music_ai import generate_music_ai
 import argparse
 import os
 import yaml
 import sys
-import os
+
+# Add parent directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from src.utils.upload_youtube import upload_video
+from src.utils.create_video import create_video
+from src.generators.generate_image_ai import generate_image_ai
+from src.generators.generate_music_ai import generate_music_ai
 
 
 def load_models_config():
@@ -20,9 +22,9 @@ def load_models_config():
         return yaml.safe_load(f)
 
 
-def run_ai_pipeline(prompt, duration=30, title=None, description="", tags=None,
-                    privacy="public", skip_upload=False, music_model=None,
-                    image_model=None, preset=None):
+def run_pipeline_ai(prompt, duration=30, output_path="output/video", title=None, 
+                    description="", tags=None, privacy="public", skip_upload=False, 
+                    music_model=None, image_model=None, preset=None):
     """Runs the pipeline with AI models"""
 
     models_config = load_models_config()
@@ -51,9 +53,14 @@ def run_ai_pipeline(prompt, duration=30, title=None, description="", tags=None,
     print(f"🎨 Model de Image: {image_model}")
     print("=" * 60)
 
+    # Setup output paths
+    music_output = f"{output_path}_music"
+    image_output = f"{output_path}.png"
+    video_output = f"{output_path}.mp4"
+    
     # 1. Generate music
     print("\n📍 STEP 1/4: Generating music with AI...")
-    music_path = generate_music_ai(prompt, duration, "output/music", music_model)
+    music_path = generate_music_ai(prompt, duration, music_output, music_model)
 
     if not music_path:
         print("❌ Failed to generate music")
@@ -61,7 +68,7 @@ def run_ai_pipeline(prompt, duration=30, title=None, description="", tags=None,
 
     # 2. Generate image
     print("\n📍 STEP 2/4: Generating cover image with AI...")
-    image_path = generate_image_ai(prompt, "output/cover.png", image_model)
+    image_path = generate_image_ai(prompt, image_output, image_model)
 
     if not image_path:
         print("❌ Failed to generate image")
@@ -69,7 +76,7 @@ def run_ai_pipeline(prompt, duration=30, title=None, description="", tags=None,
 
     # 3. Create video
     print("\n📍 STEP 3/4: Creating video...")
-    video_path = create_video(music_path, image_path, "output/video.mp4")
+    video_path = create_video(music_path, image_path, video_output)
 
     # 4. Upload to YouTube (optional)
     video_url = None
@@ -124,9 +131,10 @@ def main():
 
     tags = args.tags.split(',') if args.tags else None
 
-    run_ai_pipeline(
+    run_pipeline_ai(
         args.prompt,
         args.duration,
+        "output/video",
         args.title,
         args.description,
         tags,

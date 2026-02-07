@@ -69,10 +69,10 @@ jobs:
             --duration ${{ github.event.inputs.duration }} \
             --preset ${{ github.event.inputs.preset }} \
             --output-bucket ${{ steps.get-bucket.outputs.bucket_name }} \
-            --wait > job_output.txt 2>&1
+            --wait > job_output.txt 2>&1 || true
           
           # Extract job ID from output
-          JOB_ID=$(grep -oP 'Job ID: \K[0-9_]+' job_output.txt | head -1)
+          JOB_ID=$(grep -oP 'Job ID: \K[0-9_]+' job_output.txt | head -1 || echo "unknown")
           echo "job_id=$JOB_ID" >> $GITHUB_OUTPUT
           
           cat job_output.txt
@@ -96,7 +96,12 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-            const jobOutput = fs.readFileSync('job_output.txt', 'utf8');
+            let jobOutput = 'No output available';
+            try {
+              jobOutput = fs.readFileSync('job_output.txt', 'utf8');
+            } catch (e) {
+              jobOutput = 'Error reading job output: ' + e.message;
+            }
             
             const summary = `## 🧪 Test Deployment Results
             
@@ -105,6 +110,7 @@ jobs:
             - **Duration**: ${{ github.event.inputs.duration }}s
             - **Preset**: ${{ github.event.inputs.preset }}
             - **Job ID**: ${{ steps.submit-job.outputs.job_id }}
+            - **Status**: ${{ job.status }}
             
             ### Job Output
             \`\`\`

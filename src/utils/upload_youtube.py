@@ -16,11 +16,6 @@ from googleapiclient.http import MediaFileUpload
 SCOPES = ['https://www.googleapis.com/auth/youtube.upload']
 
 
-def load_config():
-    with open('config.yaml', 'r') as f:
-        return yaml.safe_load(f)
-
-
 def get_authenticated_service():
     """Authenticate with YouTube API"""
     creds = None
