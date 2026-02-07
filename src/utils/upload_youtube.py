@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Upload de vídeo para YouTube usando YouTube Data API v3
+Upload video to YouTube using YouTube Data API v3
 """
 
 import argparse
@@ -22,15 +22,15 @@ def load_config():
 
 
 def get_authenticated_service():
-    """Autentica com a API do YouTube"""
+    """Authenticate with YouTube API"""
     creds = None
 
-    # Token salvo de autenticações anteriores
+    # Saved token from previous authentications
     if os.path.exists('token.pickle'):
         with open('token.pickle', 'rb') as token:
             creds = pickle.load(token)
 
-    # Se não há credenciais válidas, fazer login
+    # If no valid credentials, login
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
@@ -39,7 +39,7 @@ def get_authenticated_service():
                 'client_secrets.json', SCOPES)
             creds = flow.run_local_server(port=0)
 
-        # Salvar credenciais para próxima vez
+        # Save credentials for next time
         with open('token.pickle', 'wb') as token:
             pickle.dump(creds, token)
 
@@ -47,9 +47,9 @@ def get_authenticated_service():
 
 
 def upload_video(video_path, title, description="", tags=None, category="10", privacy="public"):
-    """Faz upload do vídeo para o YouTube"""
+    """Upload video to YouTube"""
 
-    print(f"📤 Iniciando upload para YouTube...")
+    print(f"📤 Starting upload to YouTube...")
     print(f"   Título: {title}")
 
     youtube = get_authenticated_service()
@@ -79,20 +79,20 @@ def upload_video(video_path, title, description="", tags=None, category="10", pr
     while response is None:
         status, response = request.next_chunk()
         if status:
-            print(f"   Progresso: {int(status.progress() * 100)}%")
+            print(f"   Progress: {int(status.progress() * 100)}%")
 
     video_id = response['id']
     video_url = f"https://www.youtube.com/watch?v={video_id}"
 
-    print(f"✅ Upload concluído!")
+    print(f"✅ Upload complete!")
     print(f"🔗 URL: {video_url}")
 
     return video_url
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Upload de vídeo para YouTube')
-    parser.add_argument('--video', type=str, required=True, help='Caminho do vídeo')
+    parser = argparse.ArgumentParser(description='Upload video to YouTube')
+    parser.add_argument('--video', type=str, required=True, help='Video path')
     parser.add_argument('--title', type=str, required=True, help='Video title')
     parser.add_argument('--description', type=str, default='', help='Video description')
     parser.add_argument('--tags', type=str, help='Comma-separated tags')

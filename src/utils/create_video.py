@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Cria vídeo combinando music e image usando FFmpeg
+Create video combining music and image using FFmpeg
 """
 
 import argparse
@@ -8,28 +8,28 @@ import subprocess
 import os
 
 def create_video(audio_path, image_path, output_path="output/video.mp4"):
-    """Combina áudio e image em um vídeo"""
+    """Combine audio and image into a video"""
 
     print(f"🎬 Creating video...")
-    print(f"   Áudio: {audio_path}")
+    print(f"   Audio: {audio_path}")
     print(f"   Image: {image_path}")
 
-    # Criar diretório de saída
+    # Create output directory
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
-    # Comando FFmpeg para criar vídeo
+    # FFmpeg command to create video
     command = [
         'ffmpeg',
-        '-loop', '1',  # Loop na image
-        '-i', image_path,  # Image de entrada
-        '-i', audio_path,  # Áudio de entrada
-        '-c:v', 'libx264',  # Codec de vídeo
-        '-tune', 'stillimage',  # Otimização para image estática
-        '-c:a', 'aac',  # Codec de áudio
-        '-b:a', '192k',  # Bitrate do áudio
-        '-pix_fmt', 'yuv420p',  # Formato de pixel (compatibilidade)
-        '-shortest',  # Duração = duração do áudio
-        '-y',  # Sobrescrever arquivo existente
+        '-loop', '1',  # Loop the image
+        '-i', image_path,  # Input image
+        '-i', audio_path,  # Input audio
+        '-c:v', 'libx264',  # Video codec
+        '-tune', 'stillimage',  # Optimization for static image
+        '-c:a', 'aac',  # Audio codec
+        '-b:a', '192k',  # Audio bitrate
+        '-pix_fmt', 'yuv420p',  # Pixel format (compatibility)
+        '-shortest',  # Duration = audio duration
+        '-y',  # Overwrite existing file
         output_path
     ]
 
@@ -38,13 +38,13 @@ def create_video(audio_path, image_path, output_path="output/video.mp4"):
         print(f"✅ Video created successfully: {output_path}")
         return output_path
     except subprocess.CalledProcessError as e:
-        print(f"❌ Erro ao criar vídeo: {e.stderr.decode()}")
+        print(f"❌ Error creating video: {e.stderr.decode()}")
         raise
 
 def main():
-    parser = argparse.ArgumentParser(description='Criar vídeo a partir de áudio e image')
-    parser.add_argument('--audio', type=str, required=True, help='Caminho do arquivo de áudio')
-    parser.add_argument('--image', type=str, required=True, help='Caminho da image')
+    parser = argparse.ArgumentParser(description='Create video from audio and image')
+    parser.add_argument('--audio', type=str, required=True, help='Audio file path')
+    parser.add_argument('--image', type=str, required=True, help='Image path')
     parser.add_argument('--output', type=str, default='output/video.mp4', help='Output path')
 
     args = parser.parse_args()

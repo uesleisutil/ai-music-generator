@@ -274,3 +274,12 @@ docs/.doctrees/
 # ============================================
 *.orig
 *.rej
+
+# AWS specific
+aws_config.json
+job_*.json
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.backup
+terraform/.terraform.lock.hcl
+terraform/terraform.tfvars

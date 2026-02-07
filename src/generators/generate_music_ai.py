@@ -20,16 +20,43 @@ def load_config():
 
 
 def generate_with_musicgen(model_id, prompt, duration, output_path):
-    """Gera music usando MusicGen"""
+    """Generates music using MusicGen"""
+    import torch
     from audiocraft.models import MusicGen
     from audiocraft.data.audio import audio_write
 
     print(f"🎵 Loading MusicGen ({model_id})...")
-    model = MusicGen.get_pretrained(model_id)
+    
+    # Device selection
+    # Note: MusicGen doesn't support MPS (Apple Silicon) due to missing operators
+    # (weight_norm, autocast). Using CPU on Mac is actually faster than MPS fallback.
+    if torch.cuda.is_available():
+        device = 'cuda'
+        print(f"🚀 Using NVIDIA GPU (CUDA)")
+    else:
+        device = 'cpu'
+        if torch.backends.mps.is_available():
+            print(f"💻 Using CPU (MusicGen doesn't support Apple Silicon GPU yet)")
+            print(f"⏳ Expected time: ~2-3 minutes for 30s, ~5-10 minutes for 60s")
+        else:
+            print(f"💻 Using CPU")
+            print(f"⏳ This may take several minutes...")
+    
+    # Load model
+    print(f"📦 Loading model weights...")
+    model = MusicGen.get_pretrained(model_id, device=device)
     model.set_generation_params(duration=duration)
 
-    print(f"🎼 Generating music: '{prompt}'...")
+    print(f"🎼 Generating {duration}s of music: '{prompt}'...")
+    print(f"⏳ Please be patient, generation in progress...")
+    
+    import time
+    start_time = time.time()
+    
     wav = model.generate([prompt])
+    
+    elapsed = time.time() - start_time
+    print(f"✅ Generation completed in {elapsed:.1f} seconds ({elapsed/60:.1f} minutes)")
 
     print(f"💾 Saving music...")
     audio_write(output_path, wav[0].cpu(), model.sample_rate, strategy="loudness")
@@ -38,7 +65,7 @@ def generate_with_musicgen(model_id, prompt, duration, output_path):
 
 
 def generate_with_audioldm(model_id, prompt, duration, output_path):
-    """Gera music usando AudioLDM"""
+    """Generate music using AudioLDM"""
     from diffusers import AudioLDMPipeline
 
     print(f"🎵 Loading AudioLDM ({model_id})...")
@@ -53,18 +80,18 @@ def generate_with_audioldm(model_id, prompt, duration, output_path):
         audio_length_in_s=duration
     ).audios[0]
 
-    # Salvar áudio
+    # Save audio
     import scipy.io.wavfile as wavfile
     sample_rate = 16000
     output_file = f"{output_path}.wav"
     wavfile.write(output_file, sample_rate, audio)
 
-    print(f"💾 Music salva em {output_file}")
+    print(f"💾 Music saved to {output_file}")
     return output_file
 
 
 def generate_with_riffusion(model_id, prompt, duration, output_path):
-    """Gera music usando Riffusion"""
+    """Generate music using Riffusion"""
     from diffusers import StableDiffusionPipeline
     import numpy as np
     from PIL import Image
@@ -87,13 +114,13 @@ def generate_with_riffusion(model_id, prompt, duration, output_path):
 
 
 def generate_music_ai(prompt, duration=30, output_path="output/music", model_key="musicgen-small"):
-    """Gera music usando o model especificado"""
+    """Generate music using the specified model"""
 
     models_config = load_models_config()
 
     if model_key not in models_config['music_models']:
         print(f"❌ Model '{model_key}' not found!")
-        print(f"💡 Use: python list_models.py para ver models disponíveis")
+        print(f"💡 Use: python list_models.py to see available models")
         return None
 
     model_info = models_config['music_models'][model_key]
@@ -108,10 +135,10 @@ def generate_music_ai(prompt, duration=30, output_path="output/music", model_key
     print(f"GPU: {'Required' if model_info['gpu_required'] else 'Optional'}")
     print(f"{'='*60}\n")
 
-    # Criar diretório de saída
+    # Create output directory
     os.makedirs(os.path.dirname(output_path) if os.path.dirname(output_path) else ".", exist_ok=True)
 
-    # Selecionar gerador baseado no model
+    # Select generator based on model
     try:
         if "musicgen" in model_key:
             return generate_with_musicgen(model_id, prompt, duration, output_path)

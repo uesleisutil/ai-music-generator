@@ -16,7 +16,7 @@ def load_models_config():
 
 
 def enhance_prompt_for_lofi(prompt):
-    """Melhora o prompt para gerar imagens lofi style/chill de alta quality"""
+    """Enhance prompt to generate high quality lofi/chill style images"""
 
     prompt_lower = prompt.lower()
 
@@ -71,7 +71,7 @@ def enhance_prompt_for_lofi(prompt):
 
 
 def generate_with_stable_diffusion(model_id, prompt, output_path, width=1280, height=720):
-    """Gera image usando Stable Diffusion com prompt otimizado"""
+    """Generate image using Stable Diffusion with optimized prompt"""
     from diffusers import StableDiffusionPipeline
 
     print(f"🎨 Loading Stable Diffusion ({model_id})...")
@@ -107,7 +107,7 @@ def generate_with_stable_diffusion(model_id, prompt, output_path, width=1280, he
 
 
 def generate_with_sdxl(model_id, prompt, output_path, width=1280, height=720):
-    """Gera image usando Stable Diffusion XL com prompt otimizado"""
+    """Generate image using Stable Diffusion XL with optimized prompt"""
     from diffusers import StableDiffusionXLPipeline
 
     print(f"🎨 Loading SDXL ({model_id})...")
@@ -140,7 +140,7 @@ def generate_with_sdxl(model_id, prompt, output_path, width=1280, height=720):
 
 
 def generate_with_kandinsky(model_id, prompt, output_path, width=1280, height=720):
-    """Gera image usando Kandinsky com prompt otimizado"""
+    """Generate image using Kandinsky with optimized prompt"""
     from diffusers import KandinskyV22Pipeline, KandinskyV22PriorPipeline
 
     print(f"🎨 Loading Kandinsky ({model_id})...")
@@ -179,13 +179,13 @@ def generate_with_kandinsky(model_id, prompt, output_path, width=1280, height=72
 
 
 def generate_image_ai(prompt, output_path="output/cover.png", model_key="sd-1-5", width=1280, height=720):
-    """Gera image usando o model especificado"""
+    """Generate image using the specified model"""
 
     models_config = load_models_config()
 
     if model_key not in models_config['image_models']:
         print(f"❌ Model '{model_key}' not found!")
-        print(f"💡 Use: python scripts/list_models.py para ver models disponíveis")
+        print(f"💡 Use: python scripts/list_models.py to see available models")
         return None
 
     model_info = models_config['image_models'][model_key]
@@ -200,10 +200,10 @@ def generate_image_ai(prompt, output_path="output/cover.png", model_key="sd-1-5"
     print(f"GPU: {'Required' if model_info['gpu_required'] else 'Optional'}")
     print(f"{'='*60}\n")
 
-    # Criar diretório de saída
+    # Create output directory
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
-    # Selecionar gerador baseado no model
+    # Select generator based on model
     try:
         if "sd-xl" in model_key:
             return generate_with_sdxl(model_id, prompt, output_path, width, height)
@@ -212,7 +212,7 @@ def generate_image_ai(prompt, output_path="output/cover.png", model_key="sd-1-5"
         elif "sd-" in model_key or "stable-diffusion" in model_key:
             return generate_with_stable_diffusion(model_id, prompt, output_path, width, height)
         else:
-            # Fallback para Stable Diffusion padrão
+            # Fallback to default Stable Diffusion
             return generate_with_stable_diffusion(model_id, prompt, output_path, width, height)
     except ImportError as e:
         print(f"❌ Error: Required libraries not installed")
@@ -225,8 +225,8 @@ def generate_image_ai(prompt, output_path="output/cover.png", model_key="sd-1-5"
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Gerar image with AI (múltiplos models)')
-    parser.add_argument('--prompt', type=str, required=True, help='Description da image')
+    parser = argparse.ArgumentParser(description='Generate image with AI (multiple models)')
+    parser.add_argument('--prompt', type=str, required=True, help='Image description')
     parser.add_argument('--output', type=str, default='output/cover.png', help='Output path')
     parser.add_argument('--model', type=str, default='sd-1-5', help='Model a usar (see list_models.py)')
     parser.add_argument('--width', type=int, default=1280, help='Largura da image')

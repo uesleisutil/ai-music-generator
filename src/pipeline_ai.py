@@ -51,7 +51,7 @@ def run_ai_pipeline(prompt, duration=30, title=None, description="", tags=None,
     print(f"🎨 Model de Image: {image_model}")
     print("=" * 60)
 
-    # 1. Gerar music
+    # 1. Generate music
     print("\n📍 STEP 1/4: Generating music with AI...")
     music_path = generate_music_ai(prompt, duration, "output/music", music_model)
 
@@ -59,7 +59,7 @@ def run_ai_pipeline(prompt, duration=30, title=None, description="", tags=None,
         print("❌ Failed to generate music")
         return None
 
-    # 2. Gerar image
+    # 2. Generate image
     print("\n📍 STEP 2/4: Generating cover image with AI...")
     image_path = generate_image_ai(prompt, "output/cover.png", image_model)
 
@@ -67,11 +67,11 @@ def run_ai_pipeline(prompt, duration=30, title=None, description="", tags=None,
         print("❌ Failed to generate image")
         return None
 
-    # 3. Criar vídeo
+    # 3. Create video
     print("\n📍 STEP 3/4: Creating video...")
     video_path = create_video(music_path, image_path, "output/video.mp4")
 
-    # 4. Upload para YouTube (opcional)
+    # 4. Upload to YouTube (optional)
     video_url = None
     if not skip_upload:
         print("\n📍 STEP 4/4: Uploading to YouTube...")
@@ -107,7 +107,7 @@ def run_ai_pipeline(prompt, duration=30, title=None, description="", tags=None,
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Complete pipeline with AI (múltiplos models)')
+    parser = argparse.ArgumentParser(description='Complete pipeline with AI (multiple models)')
     parser.add_argument('--prompt', type=str, required=True, help='Music description')
     parser.add_argument('--duration', type=int, default=30, help='Duration in seconds')
     parser.add_argument('--title', type=str, help='Video title')

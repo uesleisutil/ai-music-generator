@@ -1,237 +1,399 @@
-# 🎵 AI Music Generator for YouTube
+# 🎵 AI Music Generator - AWS Cloud Edition
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
-[![Open Source](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://opensource.org/)
+[![AWS](https://img.shields.io/badge/AWS-Cloud-orange.svg)](https://aws.amazon.com/)
+[![Deploy](https://github.com/uesleisutil/ai-music-generator/actions/workflows/deploy-aws.yml/badge.svg)](https://github.com/uesleisutil/ai-music-generator/actions/workflows/deploy-aws.yml)
 
-Complete open-source project to generate music with AI, create professional artistic covers, and automatically upload to YouTube. 100% free!
+**Generate professional AI music videos in the cloud with NVIDIA GPUs at ~$0.02 per video!**
 
-## ✨ Features
+Complete open-source project to generate music with AI (MusicGen), create artistic covers (Stable Diffusion), and automatically upload to YouTube - all running on AWS Batch with GPU acceleration and automated CI/CD.
 
-- 🎼 **Multiple Music Models**: MusicGen, AudioLDM, Riffusion - choose the best for you
-- 🎨 **High Quality Images**: Stable Diffusion with optimized prompts for lofi/anime style
-- 🎯 **Smart Presets**: Quick, Balanced, Quality, Experimental
-- 🎬 **Video Creation**: Automatically combines music + image
-- 📤 **Automatic Upload**: Publish directly to YouTube with one command
-- ⚙️ **Fully Configurable**: Choose models, quality and parameters
-- 💰 **100% Free**: All tools are open-source
-- 🖥️ **Works on CPU**: Optimized models to run without GPU (slower)
+---
 
-## 🚀 Quick Start
+## ✨ Why AWS Cloud + GitHub Actions?
 
-### Option 1: Quick Test (Without AI)
+| Feature | GitHub Actions + AWS | Manual Local |
+|---------|---------------------|--------------|
+| **Deployment** | ⚡ Automatic CI/CD | 🔧 Manual setup |
+| **Speed** | ⚡ 2-3 min/video | 🐌 5-10 min/video |
+| **GPU** | ✅ NVIDIA T4 (CUDA) | ❌ Mac ARM incompatible |
+| **Cost** | 💰 $0.02/video | 💰 $0 (but slow) |
+| **Scalability** | 🚀 Unlimited | 🔒 Limited |
+| **Maintenance** | 🤖 Automated | 👨‍💻 Manual |
 
-To quickly test the system without installing heavy models:
+**Bottom line**: Push to GitHub → Automatic deployment → Generate videos in the cloud!
+
+---
+
+## 🚀 Quick Start (5 minutes)
+
+### Step 1: Fork Repository
 
 ```bash
-# Clone the repository
-git clone https://github.com/uesleisutil/ai-music-generator.git
+# Fork on GitHub, then clone
+git clone https://github.com/YOUR-USERNAME/ai-music-generator.git
 cd ai-music-generator
-
-# Install basic dependencies
-pip install -r requirements.txt
-
-# Install FFmpeg
-brew install ffmpeg  # macOS
-# sudo apt install ffmpeg  # Linux
-
-# Test the system (generates basic images)
-python aimusic simple --prompt "cozy lofi music" --duration 30 --skip-upload
 ```
 
-⚠️ **Note**: Simple mode generates basic/abstract images. For professional quality, use AI mode below.
+### Step 2: Configure GitHub Secrets
 
-### Option 2: Professional Quality (With AI) ⭐ RECOMMENDED
+Go to **Settings** > **Secrets and variables** > **Actions** and add:
 
-To generate **professional quality** images and music like lofi YouTube channels:
+| Secret Name | Value | Example |
+|-------------|-------|---------|
+| `AWS_ACCESS_KEY_ID` | Your AWS access key | `AKIAIOSFODNN7EXAMPLE` |
+| `AWS_SECRET_ACCESS_KEY` | Your AWS secret key | `wJalrXUtnFEMI/K7MDENG/...` |
+| `S3_BUCKET_NAME` | Unique bucket name | `your-name-ai-music-2026` |
+
+📖 **Detailed guide**: [docs/GITHUB_ACTIONS_SETUP.md](docs/GITHUB_ACTIONS_SETUP.md)
+
+### Step 3: Deploy Automatically
 
 ```bash
-# Install AI models (~10-15GB)
-pip install -r requirements-full.txt
-
-# Generate music with AI (professional quality!)
-python aimusic ai --prompt "cozy lofi coffee shop music" --duration 60 --skip-upload
+# Push to main branch
+git add .
+git commit -m "Initial deployment"
+git push origin main
 ```
 
-📖 **Complete AI Guide**: [docs/AI_SETUP.md](docs/AI_SETUP.md)
+**GitHub Actions will automatically**:
+1. ✅ Deploy AWS infrastructure (Terraform)
+2. ✅ Build Docker image with AI models
+3. ✅ Push to Amazon ECR
+4. ✅ Update AWS Batch job definition
 
-## 📋 Requirements
+**Monitor progress**: Go to **Actions** tab in GitHub
 
-### Basic (Simple Mode)
-- Python 3.9+
-- FFmpeg
-- 4GB RAM
+### Step 4: Generate Your First Video
 
-### Recommended (AI Mode)
-- Python 3.9+
-- FFmpeg
-- 16GB+ RAM
-- NVIDIA GPU with 6GB+ VRAM (optional, but much faster)
-- 20GB+ disk space
-
-## 📖 How to Use
-
-### View Available Models
+After deployment completes (~10-15 min):
 
 ```bash
-# List all models (13 free options!)
-python aimusic models
+# Install AWS CLI tools
+pip install -r requirements-aws.txt
 
-# Check installed models
-python aimusic check
-```
-
-### Generate with AI (Recommended)
-
-```bash
-# Use balanced preset (best cost-benefit)
-python aimusic ai \
-  --prompt "rainy night city lofi beats" \
+# Submit job
+python aws_submit_job.py \
+  --prompt "cozy lofi coffee shop music" \
+  --duration 60 \
   --preset balanced \
-  --duration 180 \
-  --skip-upload
+  --output-bucket YOUR-BUCKET-NAME \
+  --wait
 
-# Choose specific models
-python aimusic ai \
-  --prompt "cozy coffee shop jazz" \
-  --music-model musicgen-medium \
-  --image-model sd-2-1 \
-  --duration 120 \
-  --skip-upload
-
-# Maximum quality
-python aimusic ai \
-  --prompt "peaceful forest ambience" \
-  --preset quality \
-  --duration 180 \
-  --skip-upload
+# Download result
+aws s3 cp s3://YOUR-BUCKET-NAME/output/JOB_ID/video.mp4 ./my-video.mp4
 ```
 
-### Available Presets
+**Or use GitHub Actions**:
+- Go to **Actions** > **Test Deployment** > **Run workflow**
+- Enter prompt and settings
+- Download results from artifacts
 
-- `--preset quick` - Fast, works on CPU (basic quality)
-- `--preset balanced` - Balance quality/speed ⭐ **RECOMMENDED**
-- `--preset quality` - Maximum quality (requires powerful GPU)
-- `--preset experimental` - Alternative models with unique styles
+---
 
-### Upload to YouTube
+## 🎯 GitHub Actions Workflows
+
+### 1. Deploy to AWS (Automatic)
+
+**Trigger**: Push to `main` branch
+
+**What it does**:
+- Plans and applies Terraform changes
+- Builds and pushes Docker image
+- Updates Batch job definition
+
+**Manual trigger**: Actions > Deploy to AWS > Run workflow
+
+### 2. Test Deployment (Manual)
+
+**Trigger**: Manual only
+
+**What it does**:
+- Submits test job to AWS Batch
+- Waits for completion
+- Downloads and uploads results as artifact
+
+**How to use**: Actions > Test Deployment > Run workflow
+
+### 3. Destroy Infrastructure (Manual)
+
+**Trigger**: Manual with confirmation
+
+**What it does**:
+- Empties S3 bucket
+- Deletes ECR images
+- Destroys all AWS resources
+
+**How to use**: Actions > Destroy Infrastructure > Type "destroy"
+
+---
+
+## 💰 Pricing
+
+### AWS Costs (Spot Instances)
+
+| Usage | Monthly Cost | Cost per Video |
+|-------|--------------|----------------|
+| **10 videos/day** | ~$6/month | $0.02 |
+| **50 videos/day** | ~$29/month | $0.02 |
+| **100 videos/day** | ~$58/month | $0.02 |
+
+**Breakdown per video**:
+- Compute (g4dn.xlarge Spot): $0.017
+- Storage (S3): $0.002
+- Data transfer: $0.001
+- **Total**: ~$0.02
+
+### GitHub Actions
+
+- **2,000 minutes/month** free for public repositories
+- **3,000 minutes/month** free for private repositories (Pro)
+- Each deployment: ~10-15 minutes
+- **Cost**: FREE for most users!
+
+📊 **Full pricing analysis**: [docs/AWS_PRICING.md](docs/AWS_PRICING.md)
+
+---
+
+## 🎨 Usage Examples
+
+### Single Video
 
 ```bash
-# Remove --skip-upload and configure YouTube API
-python aimusic ai --prompt "chill beats" --duration 180 --title "Chill Lofi Beats"
+python aws_submit_job.py \
+  --prompt "rainy night city with neon lights lofi" \
+  --duration 60 \
+  --preset balanced \
+  --output-bucket your-bucket-name
 ```
 
-📖 **Configure YouTube**: [docs/SETUP.md](docs/SETUP.md)
+### Batch Generation
 
-## 🎯 Prompt Examples
+```bash
+# Edit examples/batch_generate.py with your prompts
+python examples/batch_generate.py
+```
+
+### Different Quality Presets
+
+```bash
+# Quick (faster, smaller models)
+--preset quick --duration 30
+
+# Balanced (recommended)
+--preset balanced --duration 60
+
+# Quality (best quality)
+--preset quality --duration 90
+```
+
+### Monitor Jobs
+
+```bash
+# Check running jobs
+aws batch list-jobs --job-queue ai-music-generator-queue --job-status RUNNING
+
+# View logs
+aws logs tail /aws/batch/ai-music-generator --follow
+
+# Download all outputs
+aws s3 sync s3://your-bucket-name/output/ ./downloads/
+```
+
+---
+
+## 🎨 Prompt Examples
 
 ### Cafe/Interior
-```bash
-python aimusic ai --prompt "cozy coffee shop with plants and warm lighting"
+```
+cozy coffee shop with plants and warm lighting, anime style
 ```
 
 ### Night City
-```bash
-python aimusic ai --prompt "rainy night city with neon lights and reflections"
+```
+rainy night city with neon lights and reflections, lofi aesthetic
 ```
 
 ### Bedroom/Study
-```bash
-python aimusic ai --prompt "bedroom with city view and desk setup lofi"
+```
+bedroom with city view and desk setup, studio ghibli style
 ```
 
 ### Nature
+```
+peaceful forest with sunlight through trees, makoto shinkai style
+```
+
+---
+
+## 📊 Available Models
+
+### Music Models (7 options)
+- **musicgen-small** (300MB) - Fast
+- **musicgen-medium** (1.5GB) - ⭐ Recommended
+- **musicgen-large** (3.3GB) - Best quality
+- **musicgen-melody** (1.5GB) - Melody-focused
+- **audioldm** (1.2GB) - Alternative
+- **audioldm-large** (2.5GB) - High quality
+- **riffusion** (2GB) - Unique style
+
+### Image Models (6 options)
+- **sd-2-1** (5GB) - ⭐ Recommended
+- **sd-xl-base** (7GB) - Best quality
+- **sd-1-5** (4GB) - Lighter
+- **kandinsky-2-2** (5GB) - Artistic
+- **wuerstchen** (3GB) - Fast
+- **deepfloyd-if** (8GB) - Photorealistic
+
+### Presets
+- `quick` - musicgen-small + wuerstchen
+- `balanced` - musicgen-medium + sd-2-1 ⭐
+- `quality` - musicgen-large + sd-xl-base
+- `experimental` - riffusion + kandinsky-2-2
+
+---
+
+## 🛠️ Manual Deployment (Alternative)
+
+If you prefer manual deployment without GitHub Actions:
+
 ```bash
-python aimusic ai --prompt "peaceful forest with sunlight through trees"
+# Install tools
+brew install awscli terraform docker
+
+# Configure AWS
+aws configure
+
+# Deploy infrastructure
+cd terraform
+cp terraform.tfvars.example terraform.tfvars
+nano terraform.tfvars  # Edit s3_bucket_name
+terraform init
+terraform apply
+
+# Build and push Docker
+cd ..
+./scripts/build_and_push.sh
 ```
 
-## 📊 Comparison: Simple vs AI
+📖 **Complete manual guide**: [docs/AWS_SETUP.md](docs/AWS_SETUP.md)
 
-| Feature | Simple Mode | AI Mode |
-|---------|-------------|---------|
-| Image Quality | ⭐⭐ Basic | ⭐⭐⭐⭐⭐ Professional |
-| Music Quality | ⭐⭐ Synthetic | ⭐⭐⭐⭐⭐ Natural |
-| Speed | ⚡⚡⚡ Seconds | ⚡ Minutes |
-| Requires GPU | ❌ No | ⚠️ Recommended |
-| Download | ❌ No | ✅ 10-15GB |
-| Use Case | Quick tests | Production |
+---
 
-## 🐛 Troubleshooting
+## 🔧 Configuration
 
-### Images look bad/abstract
-You're using simple mode. Install AI models:
-```bash
-pip install -r requirements-full.txt
-python aimusic ai --prompt "test" --duration 30 --skip-upload
+### Change AWS Region
+
+Edit `.github/workflows/deploy-aws.yml`:
+```yaml
+env:
+  AWS_REGION: us-west-2  # Change from us-east-1
 ```
 
-### Error: "No module named 'torch'"
-```bash
-pip install -r requirements-full.txt
+### Use Different Instance Types
+
+Edit `terraform/main.tf`:
+```hcl
+instance_types = [
+  "g4dn.xlarge",    # $0.526/hour
+  "g5.xlarge",      # $1.006/hour - Better GPU
+]
 ```
 
-### Too slow
-Normal on CPU. Options:
-- Use `--preset quick` for smaller models
-- Reduce `--duration` to 30-60 seconds
-- Use NVIDIA GPU to accelerate 10x
+### Increase Concurrent Jobs
 
-### FFmpeg not found
-```bash
-# macOS
-brew install ffmpeg
-
-# Linux
-sudo apt install ffmpeg
+Edit `terraform/main.tf`:
+```hcl
+compute_resources {
+  max_vcpus = 32  # Allows 8 concurrent jobs
+}
 ```
 
-## 📁 Project Structure
-
-```
-ai-music-generator/
-├── aimusic                 # Main CLI
-├── src/                    # Source code
-│   ├── generators/         # Music and image generators
-│   ├── utils/              # Utilities (video, upload)
-│   └── pipeline*.py        # Pipelines
-├── scripts/                # Helper scripts
-├── docs/                   # Complete documentation
-└── tests/                  # Tests
-```
+---
 
 ## 📚 Documentation
 
-- 📖 [Quick Start](docs/QUICKSTART.md)
-- 🤖 [AI Setup](docs/AI_SETUP.md) ⭐ **IMPORTANT**
-- 🎨 [Models Guide](docs/MODELS.md)
-- 🔧 [Detailed Installation](docs/SETUP.md)
-- 📁 [Project Structure](docs/PROJECT_STRUCTURE.md)
+- ⚡ [GitHub Actions Setup](docs/GITHUB_ACTIONS_SETUP.md) ⭐ **NEW**
+- 📖 [AWS Setup (Manual)](docs/AWS_SETUP.md)
+- 💰 [Pricing Analysis](docs/AWS_PRICING.md)
+- 🎨 [Models Guide](docs/AI_SETUP.md)
+- 🚀 [Quick Start](docs/QUICKSTART.md)
+- 🔧 [Detailed Setup](docs/SETUP.md)
+
+---
+
+## 🐛 Troubleshooting
+
+### GitHub Actions fails
+
+**Check**:
+1. GitHub secrets are set correctly
+2. IAM user has required permissions
+3. S3 bucket name is unique
+
+**View logs**: Actions > [Workflow] > [Job] > [Step]
+
+### Job stuck in RUNNABLE
+
+Wait 2-3 minutes for EC2 instances to launch.
+
+### Job failed
+
+```bash
+aws logs tail /aws/batch/ai-music-generator --follow
+```
+
+### Bucket name already exists
+
+Change `S3_BUCKET_NAME` secret to something more unique.
+
+---
 
 ## 🤝 Contributing
 
-Contributions are welcome! See [CONTRIBUTING.md](docs/CONTRIBUTING.md) for details.
+Contributions are welcome! See [CONTRIBUTING.md](docs/CONTRIBUTING.md).
+
+---
 
 ## 📄 License
 
-This project is under the MIT license. See [LICENSE](LICENSE) for more details.
+MIT License - see [LICENSE](LICENSE) for details.
+
+---
 
 ## 🙏 Acknowledgments
 
 - [MusicGen](https://github.com/facebookresearch/audiocraft) by Meta
 - [Stable Diffusion](https://github.com/Stability-AI/stablediffusion) by Stability AI
+- [AWS Batch](https://aws.amazon.com/batch/)
+- [GitHub Actions](https://github.com/features/actions)
 - [FFmpeg](https://ffmpeg.org/)
-- [YouTube Data API](https://developers.google.com/youtube/v3)
-
-## ⭐ Star History
-
-If this project helped you, consider giving it a star! ⭐
-
-## 📧 Contact
-
-Have questions? Open an [issue](https://github.com/uesleisutil/ai-music-generator/issues)!
 
 ---
 
-**Made with ❤️ and AI**
+## 💡 Why This Project?
 
-**Tip**: For professional quality, always use `python aimusic ai` (not `simple`)!
+**Problem**: Mac ARM (Apple Silicon) doesn't support MusicGen GPU acceleration. Local generation takes 5-10 minutes per video.
+
+**Solution**: Automated CI/CD pipeline that deploys to AWS with NVIDIA GPUs for 3-5x faster generation at minimal cost.
+
+**Result**: Push to GitHub → Automatic deployment → Professional AI music videos in 2-3 minutes!
+
+---
+
+## ⭐ Star History
+
+If this project helped you, give it a star! ⭐
+
+---
+
+## 📧 Contact
+
+Questions? Open an [issue](https://github.com/uesleisutil/ai-music-generator/issues)!
+
+---
+
+**Made with ❤️, AWS, and GitHub Actions**
+
+**Cost**: ~$0.02 per video | **Speed**: 2-3 minutes | **Quality**: Professional | **Deployment**: Automatic

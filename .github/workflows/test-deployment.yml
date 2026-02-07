@@ -1,0 +1,109 @@
+name: Test Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      prompt:
+        description: 'Music prompt'
+        required: true
+        default: 'cozy lofi coffee shop music'
+      duration:
+        description: 'Duration in seconds'
+        required: true
+        default: '30'
+      preset:
+        description: 'Quality preset'
+        required: true
+        default: 'balanced'
+        type: choice
+        options:
+          - quick
+          - balanced
+          - quality
+          - experimental
+
+env:
+  AWS_REGION: us-east-1
+
+jobs:
+  submit-test-job:
+    name: Submit Test Job
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements-aws.txt
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Submit job to AWS Batch
+        id: submit-job
+        run: |
+          python aws_submit_job.py \
+            --prompt "${{ github.event.inputs.prompt }}" \
+            --duration ${{ github.event.inputs.duration }} \
+            --preset ${{ github.event.inputs.preset }} \
+            --output-bucket ${{ secrets.S3_BUCKET_NAME }} \
+            --wait > job_output.txt 2>&1
+          
+          # Extract job ID from output
+          JOB_ID=$(grep -oP 'Job ID: \K[0-9_]+' job_output.txt | head -1)
+          echo "job_id=$JOB_ID" >> $GITHUB_OUTPUT
+          
+          cat job_output.txt
+
+      - name: Download results
+        if: success()
+        run: |
+          mkdir -p test-results
+          aws s3 sync s3://${{ secrets.S3_BUCKET_NAME }}/output/${{ steps.submit-job.outputs.job_id }}/ ./test-results/
+
+      - name: Upload test results
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ steps.submit-job.outputs.job_id }}
+          path: test-results/
+
+      - name: Create Test Summary
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const jobOutput = fs.readFileSync('job_output.txt', 'utf8');
+            
+            const summary = `## 🧪 Test Deployment Results
+            
+            ### Input Parameters
+            - **Prompt**: ${{ github.event.inputs.prompt }}
+            - **Duration**: ${{ github.event.inputs.duration }}s
+            - **Preset**: ${{ github.event.inputs.preset }}
+            - **Job ID**: ${{ steps.submit-job.outputs.job_id }}
+            
+            ### Job Output
+            \`\`\`
+            ${jobOutput}
+            \`\`\`
+            
+            ### Download Results
+            Results available at: \`s3://${{ secrets.S3_BUCKET_NAME }}/output/${{ steps.submit-job.outputs.job_id }}/\`
+            
+            Or download from GitHub Actions artifacts above.
+            `;
+            
+            core.summary.addRaw(summary).write();

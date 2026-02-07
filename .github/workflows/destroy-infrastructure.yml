@@ -1,0 +1,77 @@
+name: Destroy Infrastructure
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "destroy" to confirm'
+        required: true
+
+env:
+  AWS_REGION: us-east-1
+  TERRAFORM_VERSION: 1.6.0
+
+jobs:
+  destroy:
+    name: Destroy AWS Infrastructure
+    runs-on: ubuntu-latest
+    if: github.event.inputs.confirm == 'destroy'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+      - name: Empty S3 Bucket
+        run: |
+          aws s3 rm s3://${{ secrets.S3_BUCKET_NAME }} --recursive || true
+
+      - name: Delete ECR Images
+        run: |
+          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+          aws ecr batch-delete-image \
+            --repository-name ai-music-generator \
+            --image-ids imageTag=latest || true
+
+      - name: Terraform Init
+        working-directory: ./terraform
+        run: terraform init
+
+      - name: Terraform Destroy
+        working-directory: ./terraform
+        run: |
+          terraform destroy -auto-approve \
+            -var="s3_bucket_name=${{ secrets.S3_BUCKET_NAME }}"
+
+      - name: Create Destruction Summary
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const summary = `## 🗑️ Infrastructure Destroyed
+            
+            All AWS resources have been destroyed:
+            - ❌ AWS Batch compute environment
+            - ❌ AWS Batch job queue and definition
+            - ❌ S3 bucket and contents
+            - ❌ ECR repository and images
+            - ❌ IAM roles and policies
+            - ❌ CloudWatch log groups
+            
+            **Status**: ${{ job.status }}
+            **Actor**: @${{ github.actor }}
+            **Time**: ${{ github.event.repository.updated_at }}
+            `;
+            
+            core.summary.addRaw(summary).write();

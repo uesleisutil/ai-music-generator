@@ -1,0 +1,385 @@
+# AI Music Generator - AWS Infrastructure
+# This Terraform configuration sets up AWS Batch with GPU instances
+
+terraform {
+  required_version = ">= 1.0"
+  
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+}
+
+provider "aws" {
+  region = var.aws_region
+}
+
+# Variables
+variable "aws_region" {
+  description = "AWS region"
+  type        = string
+  default     = "us-east-1"
+}
+
+variable "project_name" {
+  description = "Project name"
+  type        = string
+  default     = "ai-music-generator"
+}
+
+variable "s3_bucket_name" {
+  description = "S3 bucket for outputs"
+  type        = string
+}
+
+variable "ecr_repository_name" {
+  description = "ECR repository name"
+  type        = string
+  default     = "ai-music-generator"
+}
+
+# S3 Bucket for outputs
+resource "aws_s3_bucket" "output_bucket" {
+  bucket = var.s3_bucket_name
+  
+  tags = {
+    Name    = "${var.project_name}-output"
+    Project = var.project_name
+  }
+}
+
+resource "aws_s3_bucket_versioning" "output_bucket" {
+  bucket = aws_s3_bucket.output_bucket.id
+  
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+# ECR Repository for Docker images
+resource "aws_ecr_repository" "app" {
+  name                 = var.ecr_repository_name
+  image_tag_mutability = "MUTABLE"
+  
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+  
+  tags = {
+    Name    = var.project_name
+    Project = var.project_name
+  }
+}
+
+# IAM Role for Batch Jobs
+resource "aws_iam_role" "batch_job_role" {
+  name = "${var.project_name}-batch-job-role"
+  
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "ecs-tasks.amazonaws.com"
+        }
+      }
+    ]
+  })
+  
+  tags = {
+    Name    = "${var.project_name}-batch-job-role"
+    Project = var.project_name
+  }
+}
+
+# IAM Policy for S3 access
+resource "aws_iam_role_policy" "batch_job_s3_policy" {
+  name = "${var.project_name}-s3-policy"
+  role = aws_iam_role.batch_job_role.id
+  
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:ListBucket"
+        ]
+        Resource = [
+          aws_s3_bucket.output_bucket.arn,
+          "${aws_s3_bucket.output_bucket.arn}/*"
+        ]
+      }
+    ]
+  })
+}
+
+# IAM Policy for ECR access
+resource "aws_iam_role_policy_attachment" "batch_job_ecr_policy" {
+  role       = aws_iam_role.batch_job_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+}
+
+# IAM Role for Batch Service
+resource "aws_iam_role" "batch_service_role" {
+  name = "${var.project_name}-batch-service-role"
+  
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "batch.amazonaws.com"
+        }
+      }
+    ]
+  })
+  
+  tags = {
+    Name    = "${var.project_name}-batch-service-role"
+    Project = var.project_name
+  }
+}
+
+resource "aws_iam_role_policy_attachment" "batch_service_policy" {
+  role       = aws_iam_role.batch_service_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSBatchServiceRole"
+}
+
+# IAM Role for EC2 instances
+resource "aws_iam_role" "ecs_instance_role" {
+  name = "${var.project_name}-ecs-instance-role"
+  
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+      }
+    ]
+  })
+  
+  tags = {
+    Name    = "${var.project_name}-ecs-instance-role"
+    Project = var.project_name
+  }
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_instance_policy" {
+  role       = aws_iam_role.ecs_instance_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
+}
+
+resource "aws_iam_instance_profile" "ecs_instance_profile" {
+  name = "${var.project_name}-ecs-instance-profile"
+  role = aws_iam_role.ecs_instance_role.name
+}
+
+# Security Group
+resource "aws_security_group" "batch_sg" {
+  name        = "${var.project_name}-batch-sg"
+  description = "Security group for Batch compute environment"
+  
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  
+  tags = {
+    Name    = "${var.project_name}-batch-sg"
+    Project = var.project_name
+  }
+}
+
+# Launch Template for GPU instances
+resource "aws_launch_template" "batch_lt" {
+  name_prefix = "${var.project_name}-batch-"
+  
+  block_device_mappings {
+    device_name = "/dev/xvda"
+    
+    ebs {
+      volume_size           = 100
+      volume_type           = "gp3"
+      delete_on_termination = true
+    }
+  }
+  
+  tag_specifications {
+    resource_type = "instance"
+    
+    tags = {
+      Name    = "${var.project_name}-batch-instance"
+      Project = var.project_name
+    }
+  }
+}
+
+# Batch Compute Environment (Spot instances for cost savings)
+resource "aws_batch_compute_environment" "gpu_spot" {
+  compute_environment_name = "${var.project_name}-gpu-spot"
+  type                     = "MANAGED"
+  service_role             = aws_iam_role.batch_service_role.arn
+  
+  compute_resources {
+    type                = "SPOT"
+    allocation_strategy = "SPOT_CAPACITY_OPTIMIZED"
+    bid_percentage      = 100
+    
+    instance_role = aws_iam_instance_profile.ecs_instance_profile.arn
+    instance_types = [
+      "g4dn.xlarge",
+      "g4dn.2xlarge"
+    ]
+    
+    min_vcpus     = 0
+    max_vcpus     = 16
+    desired_vcpus = 0
+    
+    security_group_ids = [aws_security_group.batch_sg.id]
+    
+    subnets = data.aws_subnets.default.ids
+    
+    launch_template {
+      launch_template_id = aws_launch_template.batch_lt.id
+      version            = "$Latest"
+    }
+    
+    tags = {
+      Name    = "${var.project_name}-batch-compute"
+      Project = var.project_name
+    }
+  }
+  
+  depends_on = [aws_iam_role_policy_attachment.batch_service_policy]
+}
+
+# Get default VPC subnets
+data "aws_vpc" "default" {
+  default = true
+}
+
+data "aws_subnets" "default" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.default.id]
+  }
+}
+
+# Batch Job Queue
+resource "aws_batch_job_queue" "gpu_queue" {
+  name     = "${var.project_name}-queue"
+  state    = "ENABLED"
+  priority = 1
+  
+  compute_environment_order {
+    order               = 1
+    compute_environment = aws_batch_compute_environment.gpu_spot.arn
+  }
+  
+  tags = {
+    Name    = "${var.project_name}-queue"
+    Project = var.project_name
+  }
+}
+
+# Batch Job Definition
+resource "aws_batch_job_definition" "gpu_job" {
+  name = "${var.project_name}-job"
+  type = "container"
+  
+  platform_capabilities = ["EC2"]
+  
+  container_properties = jsonencode({
+    image = "${aws_ecr_repository.app.repository_url}:latest"
+    
+    resourceRequirements = [
+      {
+        type  = "VCPU"
+        value = "4"
+      },
+      {
+        type  = "MEMORY"
+        value = "15360"
+      },
+      {
+        type  = "GPU"
+        value = "1"
+      }
+    ]
+    
+    jobRoleArn = aws_iam_role.batch_job_role.arn
+    
+    environment = [
+      {
+        name  = "AWS_DEFAULT_REGION"
+        value = var.aws_region
+      }
+    ]
+    
+    logConfiguration = {
+      logDriver = "awslogs"
+      options = {
+        "awslogs-group"         = "/aws/batch/${var.project_name}"
+        "awslogs-region"        = var.aws_region
+        "awslogs-stream-prefix" = "job"
+      }
+    }
+  })
+  
+  tags = {
+    Name    = "${var.project_name}-job"
+    Project = var.project_name
+  }
+}
+
+# CloudWatch Log Group
+resource "aws_cloudwatch_log_group" "batch_logs" {
+  name              = "/aws/batch/${var.project_name}"
+  retention_in_days = 7
+  
+  tags = {
+    Name    = "${var.project_name}-logs"
+    Project = var.project_name
+  }
+}
+
+# Outputs
+output "ecr_repository_url" {
+  description = "ECR repository URL"
+  value       = aws_ecr_repository.app.repository_url
+}
+
+output "s3_bucket_name" {
+  description = "S3 bucket name"
+  value       = aws_s3_bucket.output_bucket.id
+}
+
+output "job_queue_name" {
+  description = "Batch job queue name"
+  value       = aws_batch_job_queue.gpu_queue.name
+}
+
+output "job_definition_name" {
+  description = "Batch job definition name"
+  value       = aws_batch_job_definition.gpu_job.name
+}
+
+output "cloudwatch_log_group" {
+  description = "CloudWatch log group"
+  value       = aws_cloudwatch_log_group.batch_logs.name
+}
