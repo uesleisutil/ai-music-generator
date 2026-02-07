@@ -179,32 +179,9 @@ jobs:
           ECR_REGISTRY: ${{ steps.account-id.outputs.account_id }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          # Get current job definition
-          JOB_DEF=$(aws batch describe-job-definitions \
-            --job-definition-name ai-music-generator-job \
-            --status ACTIVE \
-            --query 'jobDefinitions[0]' \
-            --output json 2>/dev/null || echo "{}")
-          
-          # Check if job definition exists
-          if [ "$JOB_DEF" = "{}" ] || [ -z "$JOB_DEF" ]; then
-            echo "⚠️  Job definition not found or not active yet. Skipping update."
-            echo "The job definition will use the 'latest' tag automatically."
-            exit 0
-          fi
-          
-          # Extract container properties and update image
-          CONTAINER_PROPS=$(echo $JOB_DEF | jq --arg IMAGE "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" \
-            '.containerProperties | .image = $IMAGE')
-          
-          # Register new revision
-          aws batch register-job-definition \
-            --job-definition-name ai-music-generator-job \
-            --type container \
-            --platform-capabilities EC2 \
-            --container-properties "$CONTAINER_PROPS"
-          
-          echo "✅ Job definition updated with new image"
+          echo "ℹ️  Skipping job definition update - Terraform manages this"
+          echo "The job definition created by Terraform uses the 'latest' tag"
+          echo "Docker image pushed with tags: latest and $IMAGE_TAG"
 
   deployment-summary:
     name: Deployment Summary
