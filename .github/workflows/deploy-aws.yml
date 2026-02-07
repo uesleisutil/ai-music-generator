@@ -160,8 +160,17 @@ jobs:
             aws batch update-job-queue --job-queue ai-music-generator-queue --state DISABLED --region $AWS_REGION || true
             sleep 5
             aws batch delete-job-queue --job-queue ai-music-generator-queue --region $AWS_REGION || true
+            
+            # Wait for job queue to be fully deleted (up to 2 minutes)
             echo "Waiting for job queue to be deleted..."
-            sleep 10
+            for i in {1..24}; do
+              if ! aws batch describe-job-queues --job-queues ai-music-generator-queue --region $AWS_REGION 2>/dev/null | grep -q jobQueueName; then
+                echo "✅ Job queue deleted"
+                break
+              fi
+              echo "  Still deleting... ($i/24)"
+              sleep 5
+            done
           fi
           
           if aws batch describe-compute-environments --compute-environments ai-music-generator-gpu-spot --region $AWS_REGION 2>/dev/null | grep -q computeEnvironmentName; then
@@ -169,8 +178,17 @@ jobs:
             aws batch update-compute-environment --compute-environment ai-music-generator-gpu-spot --state DISABLED --region $AWS_REGION || true
             sleep 5
             aws batch delete-compute-environment --compute-environment ai-music-generator-gpu-spot --region $AWS_REGION || true
+            
+            # Wait for compute environment to be fully deleted (up to 2 minutes)
             echo "Waiting for compute environment to be deleted..."
-            sleep 15
+            for i in {1..24}; do
+              if ! aws batch describe-compute-environments --compute-environments ai-music-generator-gpu-spot --region $AWS_REGION 2>/dev/null | grep -q computeEnvironmentName; then
+                echo "✅ Compute environment deleted"
+                break
+              fi
+              echo "  Still deleting... ($i/24)"
+              sleep 5
+            done
           fi
           
           # Deregister job definitions
