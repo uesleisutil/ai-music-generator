@@ -149,6 +149,47 @@ jobs:
         working-directory: ./terraform
         run: terraform init
 
+      - name: Clean up orphaned resources
+        continue-on-error: true
+        run: |
+          echo "🧹 Cleaning up orphaned resources from previous partial deployments..."
+          
+          # Delete IAM roles if they exist (detach policies first)
+          for role in ai-music-generator-batch-job-role ai-music-generator-batch-service-role ai-music-generator-ecs-instance-role; do
+            if aws iam get-role --role-name $role 2>/dev/null; then
+              echo "Deleting IAM role: $role"
+              
+              # Detach managed policies
+              aws iam list-attached-role-policies --role-name $role --query 'AttachedPolicies[].PolicyArn' --output text | \
+                xargs -r -n1 aws iam detach-role-policy --role-name $role --policy-arn || true
+              
+              # Delete inline policies
+              aws iam list-role-policies --role-name $role --query 'PolicyNames[]' --output text | \
+                xargs -r -n1 aws iam delete-role-policy --role-name $role --policy-name || true
+              
+              # Delete instance profiles if any
+              aws iam list-instance-profiles-for-role --role-name $role --query 'InstanceProfiles[].InstanceProfileName' --output text | \
+                xargs -r -n1 -I {} aws iam remove-role-from-instance-profile --instance-profile-name {} --role-name $role || true
+              
+              # Delete the role
+              aws iam delete-role --role-name $role || true
+            fi
+          done
+          
+          # Delete instance profile if it exists
+          if aws iam get-instance-profile --instance-profile-name ai-music-generator-ecs-instance-profile 2>/dev/null; then
+            echo "Deleting instance profile: ai-music-generator-ecs-instance-profile"
+            aws iam delete-instance-profile --instance-profile-name ai-music-generator-ecs-instance-profile || true
+          fi
+          
+          # Delete CloudWatch log group if it exists
+          if aws logs describe-log-groups --log-group-name-prefix /aws/batch/ai-music-generator --query 'logGroups[0]' 2>/dev/null | grep -q logGroupName; then
+            echo "Deleting CloudWatch log group: /aws/batch/ai-music-generator"
+            aws logs delete-log-group --log-group-name /aws/batch/ai-music-generator || true
+          fi
+          
+          echo "✅ Cleanup complete"
+
       - name: Download Terraform Plan
         uses: actions/download-artifact@v4
         with:
