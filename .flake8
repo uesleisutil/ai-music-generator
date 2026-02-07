@@ -9,7 +9,4 @@ exclude =
     dist,
     *.egg-info,
     output
-ignore = 
-    E501,
-    W503,
-    E203
+ignore = E501,W503,E203
