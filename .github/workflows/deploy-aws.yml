@@ -213,9 +213,21 @@ jobs:
       - name: Get Outputs
         id: outputs
         working-directory: ./terraform
+        continue-on-error: true
         run: |
-          BUCKET_NAME=$(terraform output -raw s3_bucket_name 2>/dev/null || echo "not-deployed")
+          # Try to get bucket name, handle errors gracefully
+          BUCKET_NAME=$(terraform output -raw s3_bucket_name 2>&1 | grep -v "Warning" | grep -v "│" | head -1 || echo "not-deployed")
+          
+          # Clean up any terraform formatting characters
+          BUCKET_NAME=$(echo "$BUCKET_NAME" | tr -d '│' | xargs)
+          
+          # If empty or contains error text, set to not-deployed
+          if [ -z "$BUCKET_NAME" ] || [[ "$BUCKET_NAME" == *"Error"* ]] || [[ "$BUCKET_NAME" == *"No outputs"* ]]; then
+            BUCKET_NAME="not-deployed"
+          fi
+          
           echo "bucket_name=$BUCKET_NAME" >> $GITHUB_OUTPUT
+          echo "S3 Bucket: $BUCKET_NAME"
 
       - name: Create Deployment Summary
         uses: actions/github-script@v7
