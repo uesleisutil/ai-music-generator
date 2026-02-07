@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
 Gerador de imagens usando múltiplos modelos de IA
+Com prompts otimizados para estilo lofi/chill
 """
 
 import argparse
@@ -12,8 +13,62 @@ def load_models_config():
     with open('models_config.yaml', 'r') as f:
         return yaml.safe_load(f)
 
+def enhance_prompt_for_lofi(prompt):
+    """Melhora o prompt para gerar imagens estilo lofi/chill de alta qualidade"""
+    
+    prompt_lower = prompt.lower()
+    
+    # Base: sempre adicionar qualidade e estilo
+    base_quality = "masterpiece, best quality, highly detailed, professional, 4k, sharp focus"
+    
+    # Estilo lofi/anime
+    lofi_style = "lofi aesthetic, anime art style, studio ghibli inspired, makoto shinkai style"
+    lofi_style += ", soft lighting, warm color palette, cozy atmosphere, dreamy, atmospheric"
+    
+    # Detectar tipo de cena e adicionar detalhes específicos
+    if "coffee" in prompt_lower or "cafe" in prompt_lower:
+        scene = "cozy coffee shop interior, large windows with sunlight streaming in"
+        scene += ", wooden furniture, potted plants, bookshelves, warm ambient lighting"
+        scene += ", coffee cups on tables, peaceful atmosphere, indoor plants everywhere"
+        scene += ", vintage decor, soft cushions, hanging lights"
+        enhanced = f"{scene}, {prompt}, {lofi_style}, {base_quality}"
+        
+    elif "rain" in prompt_lower or "rainy" in prompt_lower:
+        scene = "rainy night cityscape, rain drops on window, wet streets with reflections"
+        scene += ", neon lights reflecting on puddles, moody atmosphere, purple and blue tones"
+        scene += ", city lights bokeh, cinematic lighting, atmospheric perspective"
+        enhanced = f"{scene}, {prompt}, {lofi_style}, {base_quality}"
+        
+    elif "night" in prompt_lower or "city" in prompt_lower:
+        scene = "night time urban landscape, city skyline, neon signs glowing"
+        scene += ", purple and pink color scheme, cyberpunk aesthetic, atmospheric"
+        scene += ", detailed architecture, street lights, starry sky, depth of field"
+        scene += ", buildings with lit windows, urban atmosphere"
+        enhanced = f"{scene}, {prompt}, {lofi_style}, {base_quality}"
+        
+    elif "bedroom" in prompt_lower or "room" in prompt_lower:
+        scene = "cozy bedroom interior, large window with city view, desk with laptop"
+        scene += ", bookshelf, plants, fairy lights, warm lighting, comfortable bed"
+        scene += ", posters on wall, vinyl records, peaceful atmosphere"
+        enhanced = f"{scene}, {prompt}, {lofi_style}, {base_quality}"
+        
+    else:
+        # Lofi genérico - criar cena urbana/café
+        scene = "lofi scene, urban environment or cozy interior, detailed background"
+        scene += ", atmospheric lighting, depth, perspective, professional composition"
+        enhanced = f"{scene}, {prompt}, {lofi_style}, {base_quality}"
+    
+    # Negative prompt muito importante para qualidade
+    negative = "blurry, low quality, distorted, ugly, bad anatomy, bad proportions, "
+    negative += "watermark, text, signature, username, artist name, "
+    negative += "worst quality, low resolution, jpeg artifacts, "
+    negative += "deformed, disfigured, mutation, extra limbs, "
+    negative += "oversaturated, undersaturated, overexposed, underexposed"
+    
+    return enhanced, negative
+
 def generate_with_stable_diffusion(model_id, prompt, output_path, width=1280, height=720):
-    """Gera imagem usando Stable Diffusion"""
+    """Gera imagem usando Stable Diffusion com prompt otimizado"""
     from diffusers import StableDiffusionPipeline
     
     print(f"🎨 Carregando Stable Diffusion ({model_id})...")
@@ -28,12 +83,18 @@ def generate_with_stable_diffusion(model_id, prompt, output_path, width=1280, he
     if device == "cuda":
         pipe.enable_attention_slicing()
     
-    print(f"🖼️  Gerando imagem: '{prompt}'...")
-    enhanced_prompt = f"{prompt}, album cover art, professional design, high quality, detailed, artistic"
+    print(f"🖼️  Gerando imagem estilo lofi: '{prompt}'...")
+    
+    # Melhorar prompt para estilo lofi
+    enhanced_prompt, negative_prompt = enhance_prompt_for_lofi(prompt)
+    
+    print(f"💡 Prompt otimizado: {enhanced_prompt[:100]}...")
     
     image = pipe(
         enhanced_prompt,
-        num_inference_steps=30,
+        negative_prompt=negative_prompt,
+        num_inference_steps=50,  # Aumentado para melhor qualidade
+        guidance_scale=8.5,  # Aumentado para seguir melhor o prompt
         width=width,
         height=height
     ).images[0]
@@ -42,7 +103,7 @@ def generate_with_stable_diffusion(model_id, prompt, output_path, width=1280, he
     return output_path
 
 def generate_with_sdxl(model_id, prompt, output_path, width=1280, height=720):
-    """Gera imagem usando Stable Diffusion XL"""
+    """Gera imagem usando Stable Diffusion XL com prompt otimizado"""
     from diffusers import StableDiffusionXLPipeline
     
     print(f"🎨 Carregando SDXL ({model_id})...")
@@ -54,12 +115,18 @@ def generate_with_sdxl(model_id, prompt, output_path, width=1280, height=720):
     )
     pipe = pipe.to(device)
     
-    print(f"🖼️  Gerando imagem: '{prompt}'...")
-    enhanced_prompt = f"{prompt}, album cover art, professional design, high quality"
+    print(f"🖼️  Gerando imagem estilo lofi: '{prompt}'...")
+    
+    # Melhorar prompt
+    enhanced_prompt, negative_prompt = enhance_prompt_for_lofi(prompt)
+    
+    print(f"💡 Prompt otimizado: {enhanced_prompt[:100]}...")
     
     image = pipe(
         enhanced_prompt,
-        num_inference_steps=30,
+        negative_prompt=negative_prompt,
+        num_inference_steps=50,  # Aumentado
+        guidance_scale=8.5,  # Aumentado
         width=width,
         height=height
     ).images[0]
@@ -68,7 +135,7 @@ def generate_with_sdxl(model_id, prompt, output_path, width=1280, height=720):
     return output_path
 
 def generate_with_kandinsky(model_id, prompt, output_path, width=1280, height=720):
-    """Gera imagem usando Kandinsky"""
+    """Gera imagem usando Kandinsky com prompt otimizado"""
     from diffusers import KandinskyV22Pipeline, KandinskyV22PriorPipeline
     
     print(f"🎨 Carregando Kandinsky ({model_id})...")
@@ -85,8 +152,12 @@ def generate_with_kandinsky(model_id, prompt, output_path, width=1280, height=72
         torch_dtype=torch.float16 if device == "cuda" else torch.float32
     ).to(device)
     
-    print(f"🖼️  Gerando imagem: '{prompt}'...")
-    enhanced_prompt = f"{prompt}, album cover, artistic, detailed"
+    print(f"🖼️  Gerando imagem estilo lofi: '{prompt}'...")
+    
+    # Melhorar prompt
+    enhanced_prompt, _ = enhance_prompt_for_lofi(prompt)
+    
+    print(f"💡 Prompt otimizado: {enhanced_prompt[:100]}...")
     
     image_embeds, negative_embeds = prior(enhanced_prompt).to_tuple()
     
@@ -94,7 +165,8 @@ def generate_with_kandinsky(model_id, prompt, output_path, width=1280, height=72
         image_embeds=image_embeds,
         negative_image_embeds=negative_embeds,
         height=height,
-        width=width
+        width=width,
+        num_inference_steps=50
     ).images[0]
     
     image.save(output_path)
@@ -107,7 +179,7 @@ def generate_image_ai(prompt, output_path="output/cover.png", model_key="sd-1-5"
     
     if model_key not in models_config['image_models']:
         print(f"❌ Modelo '{model_key}' não encontrado!")
-        print(f"💡 Use: python list_models.py para ver modelos disponíveis")
+        print(f"💡 Use: python scripts/list_models.py para ver modelos disponíveis")
         return None
     
     model_info = models_config['image_models'][model_key]

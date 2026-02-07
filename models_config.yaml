@@ -139,10 +139,10 @@ image_models:
     gpu_required: true
     description: "Qualidade fotorrealística, melhor para capas profissionais"
 
-# Configurações padrão
+# Configurações padrão (MELHORES MODELOS)
 defaults:
-  music: "musicgen-small"
-  image: "sd-1-5"
+  music: "musicgen-medium"  # Melhor equilíbrio qualidade/velocidade
+  image: "sd-2-1"  # Stable Diffusion 2.1 - excelente qualidade
   
 # Presets por estilo
 presets:
