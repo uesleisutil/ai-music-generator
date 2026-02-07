@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Verifica quais modelos estão instalados/disponíveis
+Checks which models are installed/available
 """
 
 import os
@@ -22,7 +22,7 @@ def check_cache_dir():
 
 
 def check_model_installed(model_id):
-    """Verifica se um modelo está no cache"""
+    """Verifica se um model está no cache"""
     cache_dir = check_cache_dir()
     if not cache_dir:
         return False
@@ -35,7 +35,7 @@ def check_model_installed(model_id):
 
 
 def get_model_size(model_id):
-    """Obtém tamanho do modelo no cache"""
+    """Obtém size do model no cache"""
     cache_dir = check_cache_dir()
     if not cache_dir:
         return 0
@@ -56,7 +56,7 @@ def get_model_size(model_id):
 
 
 def format_size(size_bytes):
-    """Formata tamanho em bytes para formato legível"""
+    """Formata size em bytes para formato legível"""
     for unit in ['B', 'KB', 'MB', 'GB']:
         if size_bytes < 1024.0:
             return f"{size_bytes:.1f} {unit}"
@@ -94,7 +94,7 @@ def check_dependencies():
 
 def main():
     print("=" * 80)
-    print("🔍 VERIFICAÇÃO DE MODELOS E DEPENDÊNCIAS")
+    print("🔍 MODEL AND DEPENDENCY VERIFICATION")
     print("=" * 80)
 
     # Verificar dependências
@@ -104,11 +104,11 @@ def main():
         print(f"\n⚠️  Dependências faltando: {', '.join(missing_deps)}")
         print("💡 Execute: pip install -r requirements-full.txt")
 
-    # Verificar modelos
+    # Verificar models
     config = load_models_config()
 
     print("\n" + "=" * 80)
-    print("🎵 MODELOS DE MÚSICA")
+    print("🎵 MUSIC MODELS")
     print("=" * 80)
 
     for key, model in config['music_models'].items():
@@ -120,15 +120,15 @@ def main():
             print(f"\n✓ {key}")
             print(f"  Nome: {model['name']}")
             print(f"  Status: INSTALADO")
-            print(f"  Tamanho no disco: {format_size(size)}")
+            print(f"  Size no disco: {format_size(size)}")
         else:
             print(f"\n✗ {key}")
             print(f"  Nome: {model['name']}")
             print(f"  Status: NÃO INSTALADO")
-            print(f"  Tamanho estimado: {model['size']}")
+            print(f"  Size estimado: {model['size']}")
 
     print("\n" + "=" * 80)
-    print("🎨 MODELOS DE IMAGEM")
+    print("🎨 IMAGE MODELS")
     print("=" * 80)
 
     for key, model in config['image_models'].items():
@@ -140,12 +140,12 @@ def main():
             print(f"\n✓ {key}")
             print(f"  Nome: {model['name']}")
             print(f"  Status: INSTALADO")
-            print(f"  Tamanho no disco: {format_size(size)}")
+            print(f"  Size no disco: {format_size(size)}")
         else:
             print(f"\n✗ {key}")
             print(f"  Nome: {model['name']}")
             print(f"  Status: NÃO INSTALADO")
-            print(f"  Tamanho estimado: {model['size']}")
+            print(f"  Size estimado: {model['size']}")
 
     # Resumo
     cache_dir = check_cache_dir()
@@ -158,9 +158,9 @@ def main():
         print("📊 RESUMO")
         print("=" * 80)
         print(f"\nCache: {cache_dir}")
-        print(f"Espaço usado: {format_size(total_size)}")
-        print(f"\n💡 Os modelos são baixados automaticamente na primeira vez que você os usa")
-        print(f"💡 Use: python list_models.py para ver todos os modelos disponíveis")
+        print(f"Space used: {format_size(total_size)}")
+        print(f"\n💡 Os models são baixados automaticamente na primeira vez que você os usa")
+        print(f"💡 Use: python list_models.py para ver todos os models disponíveis")
 
     print("\n" + "=" * 80)
 

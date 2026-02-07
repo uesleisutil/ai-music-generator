@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Gerador de música usando múltiplos modelos de IA
+Music generator using multiple AI models
 """
 
 import argparse
@@ -20,28 +20,28 @@ def load_config():
 
 
 def generate_with_musicgen(model_id, prompt, duration, output_path):
-    """Gera música usando MusicGen"""
+    """Gera music usando MusicGen"""
     from audiocraft.models import MusicGen
     from audiocraft.data.audio import audio_write
 
-    print(f"🎵 Carregando MusicGen ({model_id})...")
+    print(f"🎵 Loading MusicGen ({model_id})...")
     model = MusicGen.get_pretrained(model_id)
     model.set_generation_params(duration=duration)
 
     print(f"🎼 Generating music: '{prompt}'...")
     wav = model.generate([prompt])
 
-    print(f"💾 Salvando música...")
+    print(f"💾 Saving music...")
     audio_write(output_path, wav[0].cpu(), model.sample_rate, strategy="loudness")
 
     return f"{output_path}.wav"
 
 
 def generate_with_audioldm(model_id, prompt, duration, output_path):
-    """Gera música usando AudioLDM"""
+    """Gera music usando AudioLDM"""
     from diffusers import AudioLDMPipeline
 
-    print(f"🎵 Carregando AudioLDM ({model_id})...")
+    print(f"🎵 Loading AudioLDM ({model_id})...")
     device = "cuda" if torch.cuda.is_available() else "cpu"
     pipe = AudioLDMPipeline.from_pretrained(model_id, torch_dtype=torch.float16 if device == "cuda" else torch.float32)
     pipe = pipe.to(device)
@@ -64,54 +64,54 @@ def generate_with_audioldm(model_id, prompt, duration, output_path):
 
 
 def generate_with_riffusion(model_id, prompt, duration, output_path):
-    """Gera música usando Riffusion"""
+    """Gera music usando Riffusion"""
     from diffusers import StableDiffusionPipeline
     import numpy as np
     from PIL import Image
 
-    print(f"🎵 Carregando Riffusion ({model_id})...")
+    print(f"🎵 Loading Riffusion ({model_id})...")
     device = "cuda" if torch.cuda.is_available() else "cpu"
     pipe = StableDiffusionPipeline.from_pretrained(model_id, torch_dtype=torch.float16 if device == "cuda" else torch.float32)
     pipe = pipe.to(device)
 
-    print(f"🎼 Gerando espectrograma: '{prompt}'...")
-    # Riffusion gera espectrogramas que são convertidos em áudio
+    print(f"🎼 Generating spectrogram: '{prompt}'...")
+    # Riffusion generates spectrograms that are converted to audio
     image = pipe(prompt).images[0]
 
-    # Converter espectrograma para áudio (simplificado)
-    # Em produção, use a biblioteca riffusion completa
-    print(f"⚠️  Riffusion requer conversão adicional de espectrograma para áudio")
-    print(f"💡 Use MusicGen ou AudioLDM para melhor suporte")
+    # Convert spectrogram to audio (simplified)
+    # In production, use the complete riffusion library
+    print(f"⚠️  Riffusion requires additional spectrogram to audio conversion")
+    print(f"💡 Use MusicGen or AudioLDM for better support")
 
     return None
 
 
 def generate_music_ai(prompt, duration=30, output_path="output/music", model_key="musicgen-small"):
-    """Gera música usando o modelo especificado"""
+    """Gera music usando o model especificado"""
 
     models_config = load_models_config()
 
     if model_key not in models_config['music_models']:
-        print(f"❌ Modelo '{model_key}' not found!")
-        print(f"💡 Use: python list_models.py para ver modelos disponíveis")
+        print(f"❌ Model '{model_key}' not found!")
+        print(f"💡 Use: python list_models.py para ver models disponíveis")
         return None
 
     model_info = models_config['music_models'][model_key]
     model_id = model_info['model_id']
 
     print(f"\n{'='*60}")
-    print(f"🎵 Gerando Music com IA")
+    print(f"🎵 Generating Music com IA")
     print(f"{'='*60}")
-    print(f"Modelo: {model_info['name']}")
-    print(f"Qualidade: {model_info['quality']}")
-    print(f"Tamanho: {model_info['size']}")
+    print(f"Model: {model_info['name']}")
+    print(f"Quality: {model_info['quality']}")
+    print(f"Size: {model_info['size']}")
     print(f"GPU: {'Requerida' if model_info['gpu_required'] else 'Opcional'}")
     print(f"{'='*60}\n")
 
     # Criar diretório de saída
     os.makedirs(os.path.dirname(output_path) if os.path.dirname(output_path) else ".", exist_ok=True)
 
-    # Selecionar gerador baseado no modelo
+    # Selecionar gerador baseado no model
     try:
         if "musicgen" in model_key:
             return generate_with_musicgen(model_id, prompt, duration, output_path)
@@ -128,23 +128,23 @@ def generate_music_ai(prompt, duration=30, output_path="output/music", model_key
         print(f"Erro: {e}")
         return None
     except Exception as e:
-        print(f"❌ Erro ao gerar música: {e}")
+        print(f"❌ Erro ao gerar music: {e}")
         return None
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Gerar música com IA (múltiplos modelos)')
+    parser = argparse.ArgumentParser(description='Gerar music com IA (múltiplos models)')
     parser.add_argument('--prompt', type=str, required=True, help='Music description')
     parser.add_argument('--duration', type=int, default=30, help='Duration in seconds')
-    parser.add_argument('--output', type=str, default='output/music', help='Caminho de saída')
-    parser.add_argument('--model', type=str, default='musicgen-small', help='Modelo a usar (see list_models.py)')
+    parser.add_argument('--output', type=str, default='output/music', help='Output path')
+    parser.add_argument('--model', type=str, default='musicgen-small', help='Model a usar (see list_models.py)')
 
     args = parser.parse_args()
 
     result = generate_music_ai(args.prompt, args.duration, args.output, args.model)
 
     if result:
-        print(f"\n✅ Music gerada com sucesso: {result}")
+        print(f"\n✅ Music generated com success: {result}")
     else:
         print(f"\n❌ Failed to generate music")
 

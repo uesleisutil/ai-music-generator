@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Gerador de imagens usando múltiplos modelos de IA
-Com prompts otimizados para estilo lofi/chill
+Image generator using multiple AI models
+With optimized prompts for lofi/chill style
 """
 
 import argparse
@@ -16,11 +16,11 @@ def load_models_config():
 
 
 def enhance_prompt_for_lofi(prompt):
-    """Melhora o prompt para gerar imagens estilo lofi/chill de alta qualidade"""
+    """Melhora o prompt para gerar imagens estilo lofi/chill de alta quality"""
 
     prompt_lower = prompt.lower()
 
-    # Base: sempre adicionar qualidade e estilo
+    # Base: sempre adicionar quality e estilo
     base_quality = "masterpiece, best quality, highly detailed, professional, 4k, sharp focus"
 
     # Estilo lofi/anime
@@ -60,7 +60,7 @@ def enhance_prompt_for_lofi(prompt):
         scene += ", atmospheric lighting, depth, perspective, professional composition"
         enhanced = f"{scene}, {prompt}, {lofi_style}, {base_quality}"
 
-    # Negative prompt muito importante para qualidade
+    # Negative prompt muito importante para quality
     negative = "blurry, low quality, distorted, ugly, bad anatomy, bad proportions, "
     negative += "watermark, text, signature, username, artist name, "
     negative += "worst quality, low resolution, jpeg artifacts, "
@@ -71,10 +71,10 @@ def enhance_prompt_for_lofi(prompt):
 
 
 def generate_with_stable_diffusion(model_id, prompt, output_path, width=1280, height=720):
-    """Gera imagem usando Stable Diffusion com prompt otimizado"""
+    """Gera image usando Stable Diffusion com prompt otimizado"""
     from diffusers import StableDiffusionPipeline
 
-    print(f"🎨 Carregando Stable Diffusion ({model_id})...")
+    print(f"🎨 Loading Stable Diffusion ({model_id})...")
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
     pipe = StableDiffusionPipeline.from_pretrained(
@@ -96,7 +96,7 @@ def generate_with_stable_diffusion(model_id, prompt, output_path, width=1280, he
     image = pipe(
         enhanced_prompt,
         negative_prompt=negative_prompt,
-        num_inference_steps=50,  # Aumentado para melhor qualidade
+        num_inference_steps=50,  # Aumentado para melhor quality
         guidance_scale=8.5,  # Aumentado para seguir melhor o prompt
         width=width,
         height=height
@@ -107,10 +107,10 @@ def generate_with_stable_diffusion(model_id, prompt, output_path, width=1280, he
 
 
 def generate_with_sdxl(model_id, prompt, output_path, width=1280, height=720):
-    """Gera imagem usando Stable Diffusion XL com prompt otimizado"""
+    """Gera image usando Stable Diffusion XL com prompt otimizado"""
     from diffusers import StableDiffusionXLPipeline
 
-    print(f"🎨 Carregando SDXL ({model_id})...")
+    print(f"🎨 Loading SDXL ({model_id})...")
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
     pipe = StableDiffusionXLPipeline.from_pretrained(
@@ -140,10 +140,10 @@ def generate_with_sdxl(model_id, prompt, output_path, width=1280, height=720):
 
 
 def generate_with_kandinsky(model_id, prompt, output_path, width=1280, height=720):
-    """Gera imagem usando Kandinsky com prompt otimizado"""
+    """Gera image usando Kandinsky com prompt otimizado"""
     from diffusers import KandinskyV22Pipeline, KandinskyV22PriorPipeline
 
-    print(f"🎨 Carregando Kandinsky ({model_id})...")
+    print(f"🎨 Loading Kandinsky ({model_id})...")
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
     # Kandinsky usa dois estágios
@@ -179,31 +179,31 @@ def generate_with_kandinsky(model_id, prompt, output_path, width=1280, height=72
 
 
 def generate_image_ai(prompt, output_path="output/cover.png", model_key="sd-1-5", width=1280, height=720):
-    """Gera imagem usando o modelo especificado"""
+    """Gera image usando o model especificado"""
 
     models_config = load_models_config()
 
     if model_key not in models_config['image_models']:
-        print(f"❌ Modelo '{model_key}' not found!")
-        print(f"💡 Use: python scripts/list_models.py para ver modelos disponíveis")
+        print(f"❌ Model '{model_key}' not found!")
+        print(f"💡 Use: python scripts/list_models.py para ver models disponíveis")
         return None
 
     model_info = models_config['image_models'][model_key]
     model_id = model_info['model_id']
 
     print(f"\n{'='*60}")
-    print(f"🎨 Gerando Image com IA")
+    print(f"🎨 Generating Image com IA")
     print(f"{'='*60}")
-    print(f"Modelo: {model_info['name']}")
-    print(f"Qualidade: {model_info['quality']}")
-    print(f"Tamanho: {model_info['size']}")
+    print(f"Model: {model_info['name']}")
+    print(f"Quality: {model_info['quality']}")
+    print(f"Size: {model_info['size']}")
     print(f"GPU: {'Requerida' if model_info['gpu_required'] else 'Opcional'}")
     print(f"{'='*60}\n")
 
     # Criar diretório de saída
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
-    # Selecionar gerador baseado no modelo
+    # Selecionar gerador baseado no model
     try:
         if "sd-xl" in model_key:
             return generate_with_sdxl(model_id, prompt, output_path, width, height)
@@ -220,24 +220,24 @@ def generate_image_ai(prompt, output_path="output/cover.png", model_key="sd-1-5"
         print(f"Erro: {e}")
         return None
     except Exception as e:
-        print(f"❌ Erro ao gerar imagem: {e}")
+        print(f"❌ Erro ao gerar image: {e}")
         return None
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Gerar imagem com IA (múltiplos modelos)')
-    parser.add_argument('--prompt', type=str, required=True, help='Descrição da imagem')
-    parser.add_argument('--output', type=str, default='output/cover.png', help='Caminho de saída')
-    parser.add_argument('--model', type=str, default='sd-1-5', help='Modelo a usar (see list_models.py)')
-    parser.add_argument('--width', type=int, default=1280, help='Largura da imagem')
-    parser.add_argument('--height', type=int, default=720, help='Altura da imagem')
+    parser = argparse.ArgumentParser(description='Gerar image com IA (múltiplos models)')
+    parser.add_argument('--prompt', type=str, required=True, help='Description da image')
+    parser.add_argument('--output', type=str, default='output/cover.png', help='Output path')
+    parser.add_argument('--model', type=str, default='sd-1-5', help='Model a usar (see list_models.py)')
+    parser.add_argument('--width', type=int, default=1280, help='Largura da image')
+    parser.add_argument('--height', type=int, default=720, help='Altura da image')
 
     args = parser.parse_args()
 
     result = generate_image_ai(args.prompt, args.output, args.model, args.width, args.height)
 
     if result:
-        print(f"\n✅ Image gerada com sucesso: {result}")
+        print(f"\n✅ Image generated com success: {result}")
     else:
         print(f"\n❌ Failed to generate image")
 

@@ -222,7 +222,7 @@ def add_atmospheric_effects(img, accent_color):
 
 def generate_simple_image(prompt, output_path="output/cover.png"):
     """
-    Gera imagem estilo lofi/chill com cenários artísticos detalhados
+    Gera image estilo lofi/chill com cenários artísticos detalhados
     """
     print(f"⚠️  Using simple generator (without AI)")
     print(f"🎨 Generating lofi style image: '{prompt}'...")
@@ -340,16 +340,16 @@ def generate_simple_image(prompt, output_path="output/cover.png"):
     print(f"💾 Saving image to {output_path}...")
     img.save(output_path, quality=95)
 
-    print(f"✅ Image estilo lofi gerada!")
+    print(f"✅ Image estilo lofi generated!")
     print(f"💡 For real images with AI, install: pip install diffusers torch")
 
     return output_path
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Gerar imagem estilo lofi')
-    parser.add_argument('--prompt', type=str, required=True, help='Descrição da imagem')
-    parser.add_argument('--output', type=str, default='output/cover.png', help='Caminho de saída')
+    parser = argparse.ArgumentParser(description='Gerar image estilo lofi')
+    parser.add_argument('--prompt', type=str, required=True, help='Description da image')
+    parser.add_argument('--output', type=str, default='output/cover.png', help='Output path')
 
     args = parser.parse_args()
 

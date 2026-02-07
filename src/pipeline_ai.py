@@ -40,18 +40,18 @@ def run_ai_pipeline(prompt, duration=30, title=None, description="", tags=None,
         print(f"\n🎯 Using preset: {preset}")
         print(f"   {preset_config['description']}")
 
-    # Usar modelos padrão se não especificado
+    # Usar models padrão se não especificado
     music_model = music_model or models_config['defaults']['music']
     image_model = image_model or models_config['defaults']['image']
 
     print("=" * 60)
     print("🚀 PIPELINE WITH AI")
     print("=" * 60)
-    print(f"🎵 Modelo de Music: {music_model}")
-    print(f"🎨 Modelo de Image: {image_model}")
+    print(f"🎵 Model de Music: {music_model}")
+    print(f"🎨 Model de Image: {image_model}")
     print("=" * 60)
 
-    # 1. Gerar música
+    # 1. Gerar music
     print("\n📍 STEP 1/4: Generating music com IA...")
     music_path = generate_music_ai(prompt, duration, "output/music", music_model)
 
@@ -59,7 +59,7 @@ def run_ai_pipeline(prompt, duration=30, title=None, description="", tags=None,
         print("❌ Failed to generate music")
         return None
 
-    # 2. Gerar imagem
+    # 2. Gerar image
     print("\n📍 STEP 2/4: Generating cover image com IA...")
     image_path = generate_image_ai(prompt, "output/cover.png", image_model)
 
@@ -76,7 +76,7 @@ def run_ai_pipeline(prompt, duration=30, title=None, description="", tags=None,
     if not skip_upload:
         print("\n📍 STEP 4/4: Uploading to YouTube...")
         video_title = title or f"{prompt.title()}"
-        video_description = description or f"Music gerada por IA: {prompt}\n\nModelos: {music_model} + {image_model}"
+        video_description = description or f"Music generated por IA: {prompt}\n\nModels: {music_model} + {image_model}"
         video_tags = tags or ["ai music", "ai generated", "music"]
 
         try:
@@ -107,7 +107,7 @@ def run_ai_pipeline(prompt, duration=30, title=None, description="", tags=None,
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Pipeline completo com IA (múltiplos modelos)')
+    parser = argparse.ArgumentParser(description='Complete pipeline with AI (múltiplos models)')
     parser.add_argument('--prompt', type=str, required=True, help='Music description')
     parser.add_argument('--duration', type=int, default=30, help='Duration in seconds')
     parser.add_argument('--title', type=str, help='Video title')
@@ -115,8 +115,8 @@ def main():
     parser.add_argument('--tags', type=str, help='Comma-separated tags')
     parser.add_argument('--privacy', type=str, default='public', choices=['public', 'private', 'unlisted'])
     parser.add_argument('--skip-upload', action='store_true', help='Skip YouTube upload')
-    parser.add_argument('--music-model', type=str, help='Modelo de música (see list_models.py)')
-    parser.add_argument('--image-model', type=str, help='Modelo de imagem (see list_models.py)')
+    parser.add_argument('--music-model', type=str, help='Model de music (see list_models.py)')
+    parser.add_argument('--image-model', type=str, help='Model de image (see list_models.py)')
     parser.add_argument('--preset', type=str, choices=['quick', 'balanced', 'quality', 'experimental'],
                         help='Model preset')
 

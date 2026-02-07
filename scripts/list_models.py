@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Lista todos os modelos disponíveis
+Lists all available models
 """
 
 import yaml
@@ -13,10 +13,10 @@ def load_models_config():
 
 
 def list_music_models():
-    """Lista modelos de música"""
+    """Lista models de music"""
     config = load_models_config()
 
-    print("\n🎵 MODELOS DE MÚSICA DISPONÍVEIS\n")
+    print("\n🎵 AVAILABLE MUSIC MODELS\n")
 
     table_data = []
     for key, model in config['music_models'].items():
@@ -31,15 +31,15 @@ def list_music_models():
             model['description']
         ])
 
-    headers = ["ID", "Nome", "Qualidade", "Velocidade", "Tamanho", "GPU", "Descrição"]
+    headers = ["ID", "Name", "Quality", "Speed", "Size", "GPU", "Description"]
     print(tabulate(table_data, headers=headers, tablefmt="grid"))
 
 
 def list_image_models():
-    """Lista modelos de imagem"""
+    """Lista models de image"""
     config = load_models_config()
 
-    print("\n🎨 MODELOS DE IMAGEM DISPONÍVEIS\n")
+    print("\n🎨 AVAILABLE IMAGE MODELS\n")
 
     table_data = []
     for key, model in config['image_models'].items():
@@ -54,7 +54,7 @@ def list_image_models():
             model['description']
         ])
 
-    headers = ["ID", "Nome", "Qualidade", "Velocidade", "Tamanho", "GPU", "Descrição"]
+    headers = ["ID", "Name", "Quality", "Speed", "Size", "GPU", "Description"]
     print(tabulate(table_data, headers=headers, tablefmt="grid"))
 
 
@@ -62,7 +62,7 @@ def list_presets():
     """Lista presets disponíveis"""
     config = load_models_config()
 
-    print("\n⚙️  PRESETS DISPONÍVEIS\n")
+    print("\n⚙️  AVAILABLE PRESETS\n")
 
     table_data = []
     for key, preset in config['presets'].items():
@@ -73,7 +73,7 @@ def list_presets():
             preset['description']
         ])
 
-    headers = ["Preset", "Modelo Music", "Modelo Image", "Descrição"]
+    headers = ["Preset", "Music Model", "Image Model", "Description"]
     print(tabulate(table_data, headers=headers, tablefmt="grid"))
 
     print("\n💡 Use: --preset quick|balanced|quality|experimental")
@@ -81,7 +81,7 @@ def list_presets():
 
 def main():
     print("=" * 80)
-    print("🤖 MODELOS DE IA DISPONÍVEIS - 100% GRATUITOS")
+    print("🤖 AVAILABLE AI MODELS - 100% FREE")
     print("=" * 80)
 
     list_music_models()
@@ -89,13 +89,13 @@ def main():
     list_presets()
 
     print("\n" + "=" * 80)
-    print("📖 COMO USAR")
+    print("📖 HOW TO USE")
     print("=" * 80)
-    print("\n# Usar modelo específico:")
+    print("\n# Usar model específico:")
     print("python pipeline.py --music-model musicgen-medium --image-model sd-2-1 --prompt 'test'")
-    print("\n# Usar preset:")
+    print("\n# Use preset:")
     print("python pipeline.py --preset balanced --prompt 'cozy lofi music'")
-    print("\n# Listar modelos instalados:")
+    print("\n# Listar models instalados:")
     print("python check_models.py")
     print("\n" + "=" * 80)
 

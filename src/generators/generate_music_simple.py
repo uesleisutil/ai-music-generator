@@ -18,7 +18,7 @@ def load_config():
 
 def generate_simple_music(prompt, duration=30, output_path="output/music"):
     """
-    Gera música simples usando síntese de áudio
+    Gera music simples usando síntese de áudio
     NOTA: Esta é uma versão simplificada para testes.
     For real music with AI, install audiocraft: pip install audiocraft
     """
@@ -82,17 +82,17 @@ def generate_simple_music(prompt, duration=30, output_path="output/music"):
     print(f"💾 Saving music to {output_file}...")
     wavfile.write(output_file, sample_rate, audio_int16)
 
-    print(f"✅ Music de teste gerada!")
+    print(f"✅ Music de teste generated!")
     print(f"💡 For real music with AI, install: pip install torch audiocraft")
 
     return output_file
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Gerar música simples (sem IA)')
+    parser = argparse.ArgumentParser(description='Gerar music simples (sem IA)')
     parser.add_argument('--prompt', type=str, required=True, help='Music description')
     parser.add_argument('--duration', type=int, default=30, help='Duration in seconds')
-    parser.add_argument('--output', type=str, default='output/music', help='Caminho de saída')
+    parser.add_argument('--output', type=str, default='output/music', help='Output path')
 
     args = parser.parse_args()
 
