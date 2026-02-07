@@ -1,0 +1,167 @@
+# Configuração de Modelos Disponíveis (Todos Gratuitos!)
+
+music_models:
+  # Modelos MusicGen (Meta/Facebook)
+  musicgen-small:
+    name: "MusicGen Small"
+    model_id: "facebook/musicgen-small"
+    provider: "Meta"
+    size: "300MB"
+    quality: "Básica"
+    speed: "Rápido"
+    gpu_required: false
+    description: "Modelo pequeno e rápido, funciona em CPU"
+    
+  musicgen-medium:
+    name: "MusicGen Medium"
+    model_id: "facebook/musicgen-medium"
+    provider: "Meta"
+    size: "1.5GB"
+    quality: "Boa"
+    speed: "Médio"
+    gpu_required: true
+    description: "Equilíbrio entre qualidade e velocidade"
+    
+  musicgen-large:
+    name: "MusicGen Large"
+    model_id: "facebook/musicgen-large"
+    provider: "Meta"
+    size: "3.3GB"
+    quality: "Excelente"
+    speed: "Lento"
+    gpu_required: true
+    description: "Melhor qualidade, requer GPU potente"
+    
+  musicgen-melody:
+    name: "MusicGen Melody"
+    model_id: "facebook/musicgen-melody"
+    provider: "Meta"
+    size: "1.5GB"
+    quality: "Boa"
+    speed: "Médio"
+    gpu_required: true
+    description: "Especializado em melodias, aceita áudio de referência"
+    
+  # Riffusion (Stable Diffusion para áudio)
+  riffusion:
+    name: "Riffusion"
+    model_id: "riffusion/riffusion-model-v1"
+    provider: "Riffusion"
+    size: "2GB"
+    quality: "Boa"
+    speed: "Médio"
+    gpu_required: true
+    description: "Gera música usando Stable Diffusion, estilo único"
+    
+  # AudioLDM (Text-to-Audio)
+  audioldm:
+    name: "AudioLDM"
+    model_id: "cvssp/audioldm-s-full-v2"
+    provider: "CVSSP"
+    size: "1.2GB"
+    quality: "Boa"
+    speed: "Rápido"
+    gpu_required: false
+    description: "Text-to-audio, ótimo para efeitos sonoros e música"
+    
+  audioldm-large:
+    name: "AudioLDM Large"
+    model_id: "cvssp/audioldm-l-full"
+    provider: "CVSSP"
+    size: "2.5GB"
+    quality: "Excelente"
+    speed: "Médio"
+    gpu_required: true
+    description: "Versão maior do AudioLDM, melhor qualidade"
+
+image_models:
+  # Stable Diffusion
+  sd-2-1:
+    name: "Stable Diffusion 2.1"
+    model_id: "stabilityai/stable-diffusion-2-1"
+    provider: "Stability AI"
+    size: "5GB"
+    quality: "Excelente"
+    speed: "Médio"
+    gpu_required: true
+    description: "Modelo padrão, excelente qualidade"
+    
+  sd-xl-base:
+    name: "Stable Diffusion XL"
+    model_id: "stabilityai/stable-diffusion-xl-base-1.0"
+    provider: "Stability AI"
+    size: "7GB"
+    quality: "Excepcional"
+    speed: "Lento"
+    gpu_required: true
+    description: "Melhor qualidade disponível, requer GPU potente"
+    
+  sd-1-5:
+    name: "Stable Diffusion 1.5"
+    model_id: "runwayml/stable-diffusion-v1-5"
+    provider: "Runway ML"
+    size: "4GB"
+    quality: "Boa"
+    speed: "Rápido"
+    gpu_required: false
+    description: "Versão mais leve, funciona em GPUs modestas"
+    
+  # Kandinsky
+  kandinsky-2-2:
+    name: "Kandinsky 2.2"
+    model_id: "kandinsky-community/kandinsky-2-2-decoder"
+    provider: "Kandinsky"
+    size: "5GB"
+    quality: "Excelente"
+    speed: "Médio"
+    gpu_required: true
+    description: "Estilo artístico único, ótimo para capas"
+    
+  # Wuerstchen
+  wuerstchen:
+    name: "Würstchen"
+    model_id: "warp-ai/wuerstchen"
+    provider: "Warp AI"
+    size: "3GB"
+    quality: "Boa"
+    speed: "Muito Rápido"
+    gpu_required: false
+    description: "Modelo compacto e rápido, boa qualidade"
+    
+  # DeepFloyd IF
+  deepfloyd-if:
+    name: "DeepFloyd IF"
+    model_id: "DeepFloyd/IF-I-XL-v1.0"
+    provider: "DeepFloyd"
+    size: "8GB"
+    quality: "Excepcional"
+    speed: "Lento"
+    gpu_required: true
+    description: "Qualidade fotorrealística, melhor para capas profissionais"
+
+# Configurações padrão
+defaults:
+  music: "musicgen-small"
+  image: "sd-1-5"
+  
+# Presets por estilo
+presets:
+  quick:
+    music: "musicgen-small"
+    image: "wuerstchen"
+    description: "Rápido e leve, funciona em CPU"
+    
+  balanced:
+    music: "musicgen-medium"
+    image: "sd-2-1"
+    description: "Equilíbrio entre qualidade e velocidade"
+    
+  quality:
+    music: "musicgen-large"
+    image: "sd-xl-base"
+    description: "Máxima qualidade, requer GPU potente"
+    
+  experimental:
+    music: "riffusion"
+    image: "kandinsky-2-2"
+    description: "Modelos alternativos com estilos únicos"
