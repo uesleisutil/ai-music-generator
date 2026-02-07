@@ -35,7 +35,7 @@ def create_video(audio_path, image_path, output_path="output/video.mp4"):
 
     try:
         subprocess.run(command, check=True, capture_output=True)
-        print(f"✅ Video created com success: {output_path}")
+        print(f"✅ Video created successfully: {output_path}")
         return output_path
     except subprocess.CalledProcessError as e:
         print(f"❌ Erro ao criar vídeo: {e.stderr.decode()}")

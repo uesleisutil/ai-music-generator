@@ -16,7 +16,7 @@ def load_models_config():
 
 
 def enhance_prompt_for_lofi(prompt):
-    """Melhora o prompt para gerar imagens estilo lofi/chill de alta quality"""
+    """Melhora o prompt para gerar imagens lofi style/chill de alta quality"""
 
     prompt_lower = prompt.lower()
 
@@ -88,7 +88,7 @@ def generate_with_stable_diffusion(model_id, prompt, output_path, width=1280, he
 
     print(f"🖼️  Generating lofi style image: '{prompt}'...")
 
-    # Melhorar prompt para estilo lofi
+    # Melhorar prompt para lofi style
     enhanced_prompt, negative_prompt = enhance_prompt_for_lofi(prompt)
 
     print(f"💡 Prompt otimizado: {enhanced_prompt[:100]}...")
@@ -192,12 +192,12 @@ def generate_image_ai(prompt, output_path="output/cover.png", model_key="sd-1-5"
     model_id = model_info['model_id']
 
     print(f"\n{'='*60}")
-    print(f"🎨 Generating Image com IA")
+    print(f"🎨 Generating Image with AI")
     print(f"{'='*60}")
     print(f"Model: {model_info['name']}")
     print(f"Quality: {model_info['quality']}")
     print(f"Size: {model_info['size']}")
-    print(f"GPU: {'Requerida' if model_info['gpu_required'] else 'Opcional'}")
+    print(f"GPU: {'Required' if model_info['gpu_required'] else 'Optional'}")
     print(f"{'='*60}\n")
 
     # Criar diretório de saída
@@ -215,17 +215,17 @@ def generate_image_ai(prompt, output_path="output/cover.png", model_key="sd-1-5"
             # Fallback para Stable Diffusion padrão
             return generate_with_stable_diffusion(model_id, prompt, output_path, width, height)
     except ImportError as e:
-        print(f"❌ Erro: Bibliotecas necessárias não instaladas")
-        print(f"💡 Execute: pip install -r requirements-full.txt")
-        print(f"Erro: {e}")
+        print(f"❌ Error: Required libraries not installed")
+        print(f"💡 Run: pip install -r requirements-full.txt")
+        print(f"Error: {e}")
         return None
     except Exception as e:
-        print(f"❌ Erro ao gerar image: {e}")
+        print(f"❌ Error generating image: {e}")
         return None
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Gerar image com IA (múltiplos models)')
+    parser = argparse.ArgumentParser(description='Gerar image with AI (múltiplos models)')
     parser.add_argument('--prompt', type=str, required=True, help='Description da image')
     parser.add_argument('--output', type=str, default='output/cover.png', help='Output path')
     parser.add_argument('--model', type=str, default='sd-1-5', help='Model a usar (see list_models.py)')
@@ -237,7 +237,7 @@ def main():
     result = generate_image_ai(args.prompt, args.output, args.model, args.width, args.height)
 
     if result:
-        print(f"\n✅ Image generated com success: {result}")
+        print(f"\n✅ Image generated successfully: {result}")
     else:
         print(f"\n❌ Failed to generate image")
 

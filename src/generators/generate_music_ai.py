@@ -100,12 +100,12 @@ def generate_music_ai(prompt, duration=30, output_path="output/music", model_key
     model_id = model_info['model_id']
 
     print(f"\n{'='*60}")
-    print(f"🎵 Generating Music com IA")
+    print(f"🎵 Generating Music with AI")
     print(f"{'='*60}")
     print(f"Model: {model_info['name']}")
     print(f"Quality: {model_info['quality']}")
     print(f"Size: {model_info['size']}")
-    print(f"GPU: {'Requerida' if model_info['gpu_required'] else 'Opcional'}")
+    print(f"GPU: {'Required' if model_info['gpu_required'] else 'Optional'}")
     print(f"{'='*60}\n")
 
     # Criar diretório de saída
@@ -120,20 +120,20 @@ def generate_music_ai(prompt, duration=30, output_path="output/music", model_key
         elif "riffusion" in model_key:
             return generate_with_riffusion(model_id, prompt, duration, output_path)
         else:
-            print(f"❌ Gerador não implementado para {model_key}")
+            print(f"❌ Generator not implemented for {model_key}")
             return None
     except ImportError as e:
-        print(f"❌ Erro: Bibliotecas necessárias não instaladas")
-        print(f"💡 Execute: pip install -r requirements-full.txt")
-        print(f"Erro: {e}")
+        print(f"❌ Error: Required libraries not installed")
+        print(f"💡 Run: pip install -r requirements-full.txt")
+        print(f"Error: {e}")
         return None
     except Exception as e:
-        print(f"❌ Erro ao gerar music: {e}")
+        print(f"❌ Error generating music: {e}")
         return None
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Gerar music com IA (múltiplos models)')
+    parser = argparse.ArgumentParser(description='Generate music with AI (multiple models)')
     parser.add_argument('--prompt', type=str, required=True, help='Music description')
     parser.add_argument('--duration', type=int, default=30, help='Duration in seconds')
     parser.add_argument('--output', type=str, default='output/music', help='Output path')
@@ -144,7 +144,7 @@ def main():
     result = generate_music_ai(args.prompt, args.duration, args.output, args.model)
 
     if result:
-        print(f"\n✅ Music generated com success: {result}")
+        print(f"\n✅ Music generated successfully: {result}")
     else:
         print(f"\n❌ Failed to generate music")
 

@@ -102,7 +102,7 @@ def main():
 
     if missing_deps:
         print(f"\n⚠️  Dependências faltando: {', '.join(missing_deps)}")
-        print("💡 Execute: pip install -r requirements-full.txt")
+        print("💡 Run: pip install -r requirements-full.txt")
 
     # Verificar models
     config = load_models_config()

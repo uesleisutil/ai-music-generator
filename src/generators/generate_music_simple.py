@@ -23,7 +23,7 @@ def generate_simple_music(prompt, duration=30, output_path="output/music"):
     For real music with AI, install audiocraft: pip install audiocraft
     """
     print(f"⚠️  Using simple generator (without AI)")
-    print(f"🎵 Generating music de teste: '{prompt}' ({duration}s)...")
+    print(f"🎵 Generating music test: '{prompt}' ({duration}s)...")
 
     # Parâmetros
     sample_rate = 44100
@@ -82,7 +82,7 @@ def generate_simple_music(prompt, duration=30, output_path="output/music"):
     print(f"💾 Saving music to {output_file}...")
     wavfile.write(output_file, sample_rate, audio_int16)
 
-    print(f"✅ Music de teste generated!")
+    print(f"✅ Music test generated!")
     print(f"💡 For real music with AI, install: pip install torch audiocraft")
 
     return output_file

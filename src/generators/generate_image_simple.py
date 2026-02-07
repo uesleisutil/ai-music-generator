@@ -12,7 +12,7 @@ import math
 
 
 def create_lofi_cityscape(width, height, colors, accent_color):
-    """Cria uma paisagem urbana estilo lofi com perspectiva"""
+    """Cria uma paisagem urbana lofi style com perspectiva"""
     img = Image.new('RGB', (width, height))
     draw = ImageDraw.Draw(img)
 
@@ -129,7 +129,7 @@ def create_lofi_cityscape(width, height, colors, accent_color):
 
 
 def create_lofi_cafe(width, height, colors, accent_color):
-    """Cria interior de café estilo lofi"""
+    """Cria interior de café lofi style"""
     img = Image.new('RGB', (width, height))
     draw = ImageDraw.Draw(img)
 
@@ -222,7 +222,7 @@ def add_atmospheric_effects(img, accent_color):
 
 def generate_simple_image(prompt, output_path="output/cover.png"):
     """
-    Gera image estilo lofi/chill com cenários artísticos detalhados
+    Gera image lofi style/chill com cenários artísticos detalhados
     """
     print(f"⚠️  Using simple generator (without AI)")
     print(f"🎨 Generating lofi style image: '{prompt}'...")
@@ -266,7 +266,7 @@ def generate_simple_image(prompt, output_path="output/cover.png"):
     img = img.convert('RGB')
     draw = ImageDraw.Draw(img)
 
-    # Adicionar texto estilo lofi
+    # Adicionar texto lofi style
     try:
         font_paths = [
             "/System/Library/Fonts/Helvetica.ttc",
@@ -340,14 +340,14 @@ def generate_simple_image(prompt, output_path="output/cover.png"):
     print(f"💾 Saving image to {output_path}...")
     img.save(output_path, quality=95)
 
-    print(f"✅ Image estilo lofi generated!")
+    print(f"✅ Image lofi style generated!")
     print(f"💡 For real images with AI, install: pip install diffusers torch")
 
     return output_path
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Gerar image estilo lofi')
+    parser = argparse.ArgumentParser(description='Gerar image lofi style')
     parser.add_argument('--prompt', type=str, required=True, help='Description da image')
     parser.add_argument('--output', type=str, default='output/cover.png', help='Output path')
 

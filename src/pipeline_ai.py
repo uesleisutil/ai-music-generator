@@ -52,7 +52,7 @@ def run_ai_pipeline(prompt, duration=30, title=None, description="", tags=None,
     print("=" * 60)
 
     # 1. Gerar music
-    print("\n📍 STEP 1/4: Generating music com IA...")
+    print("\n📍 STEP 1/4: Generating music with AI...")
     music_path = generate_music_ai(prompt, duration, "output/music", music_model)
 
     if not music_path:
@@ -60,7 +60,7 @@ def run_ai_pipeline(prompt, duration=30, title=None, description="", tags=None,
         return None
 
     # 2. Gerar image
-    print("\n📍 STEP 2/4: Generating cover image com IA...")
+    print("\n📍 STEP 2/4: Generating cover image with AI...")
     image_path = generate_image_ai(prompt, "output/cover.png", image_model)
 
     if not image_path:
