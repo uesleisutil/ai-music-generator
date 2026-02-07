@@ -279,9 +279,9 @@ resource "aws_batch_compute_environment" "gpu_spot" {
       "g4dn.2xlarge"
     ]
     
-    min_vcpus     = 4  # Keep 1 instance warm (g4dn.xlarge = 4 vCPUs)
+    min_vcpus     = 0  # Scale down to 0 when no jobs (saves cost)
     max_vcpus     = 16
-    desired_vcpus = 4  # Start with 1 instance ready
+    desired_vcpus = 0  # Start with no instances
     
     security_group_ids = [aws_security_group.batch_sg.id]
     

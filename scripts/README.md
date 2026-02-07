@@ -6,7 +6,38 @@ Utility scripts for managing the AI Music Generator infrastructure.
 
 ## 📋 Available Scripts
 
-### 1. `setup_cost_alerts.py` ⭐ (Recommended)
+### 1. `warm_up_gpu.py` 🔥 (Performance Optimization)
+
+Python script to warm up GPU instance before submitting jobs. Keeps instance running for specified duration (default: 60 minutes), then automatically scales down.
+
+**Why use this:**
+- First job takes 5-10 minutes (GPU provisioning + Docker download)
+- With warm-up, jobs start immediately
+- Auto-scales down after duration to save costs
+
+**Usage:**
+```bash
+# Warm up for 1 hour (default)
+python scripts/warm_up_gpu.py
+
+# Warm up for 30 minutes
+python scripts/warm_up_gpu.py --duration 30
+
+# Custom settings
+python scripts/warm_up_gpu.py --duration 60 --profile b3tr --region us-east-1
+```
+
+**Workflow:**
+1. Run warm-up before your work session
+2. Submit jobs while instance is warm (fast!)
+3. Instance auto-scales down after duration
+4. Or press Ctrl+C to scale down immediately
+
+**Cost:** g4dn.xlarge Spot ~$0.16/hour (1 hour = ~$0.16)
+
+---
+
+### 2. `setup_cost_alerts.py` ⭐ (Recommended)
 
 Python script to create AWS budget alerts at R$5 increments.
 
