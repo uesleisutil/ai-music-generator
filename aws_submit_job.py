@@ -186,28 +186,6 @@ def main():
         output_bucket=args.output_bucket,
         output_prefix=args.output_prefix,
         wait=args.wait
-    ) 
-                       choices=['quick', 'balanced', 'quality', 'experimental'],
-                       help='Quality preset')
-    parser.add_argument('--output-bucket', type=str, required=True, help='S3 bucket for output')
-    parser.add_argument('--output-prefix', type=str, default='output', help='S3 prefix for output')
-    parser.add_argument('--job-queue', type=str, default='ai-music-generator-queue', 
-                       help='AWS Batch job queue name')
-    parser.add_argument('--job-definition', type=str, default='ai-music-generator-job',
-                       help='AWS Batch job definition name')
-    parser.add_argument('--wait', action='store_true', help='Wait for job to complete')
-    
-    args = parser.parse_args()
-    
-    result = submit_job(
-        prompt=args.prompt,
-        duration=args.duration,
-        preset=args.preset,
-        job_queue=args.job_queue,
-        job_definition=args.job_definition,
-        output_bucket=args.output_bucket,
-        output_prefix=args.output_prefix,
-        wait=args.wait
     )
     
     # Save job info

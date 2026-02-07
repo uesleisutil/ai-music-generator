@@ -82,13 +82,17 @@ jobs:
       - name: Get S3 Bucket Name
         id: get-bucket
         run: |
-          # Get bucket name from Terraform output
-          cd terraform
-          terraform init
-          BUCKET_NAME=$(terraform output -raw s3_bucket_name)
+          # Get bucket name from AWS S3 (find bucket with ai-music-gen prefix)
+          BUCKET_NAME=$(aws s3 ls | grep ai-music-gen | awk '{print $3}' | head -1)
+          
+          if [ -z "$BUCKET_NAME" ]; then
+            echo "❌ Error: No S3 bucket found with prefix 'ai-music-gen'"
+            echo "Please run the 'Deploy to AWS' workflow first to create infrastructure"
+            exit 1
+          fi
+          
           echo "bucket_name=$BUCKET_NAME" >> $GITHUB_OUTPUT
-          echo "Using S3 bucket: $BUCKET_NAME"
-          cd ..
+          echo "✅ Using S3 bucket: $BUCKET_NAME"
 
       - name: Submit job to AWS Batch
         id: submit-job
@@ -98,9 +102,6 @@ jobs:
             --duration ${{ github.event.inputs.duration }} \
             --preset ${{ github.event.inputs.preset }} \
             --resolution ${{ github.event.inputs.resolution }} \
-            --output-bucket ${{ steps.get-bucket.outputs.bucket_name }} \
-            --wait > job_output.txt 2>&1 || true
-            --preset ${{ github.event.inputs.preset }} \
             --output-bucket ${{ steps.get-bucket.outputs.bucket_name }} \
             --wait > job_output.txt 2>&1 || true
           
