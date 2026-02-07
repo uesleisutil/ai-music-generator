@@ -193,9 +193,9 @@ jobs:
             exit 0
           fi
           
-          # Update image in container properties
+          # Extract container properties and update image
           CONTAINER_PROPS=$(echo $JOB_DEF | jq --arg IMAGE "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" \
-            '.containerProperties.image = $IMAGE')
+            '.containerProperties | .image = $IMAGE')
           
           # Register new revision
           aws batch register-job-definition \
