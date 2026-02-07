@@ -32,10 +32,24 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
+          terraform_wrapper: false
+
+      - name: Terraform Init
+        working-directory: ./terraform
+        run: terraform init
+
+      - name: Get S3 Bucket Name
+        id: get-bucket
+        working-directory: ./terraform
+        run: |
+          BUCKET_NAME=$(terraform output -raw s3_bucket_name 2>/dev/null || echo "")
+          echo "bucket_name=$BUCKET_NAME" >> $GITHUB_OUTPUT
+          echo "S3 Bucket: $BUCKET_NAME"
 
       - name: Empty S3 Bucket
+        if: steps.get-bucket.outputs.bucket_name != ''
         run: |
-          aws s3 rm s3://${{ secrets.S3_BUCKET_NAME }} --recursive || true
+          aws s3 rm s3://${{ steps.get-bucket.outputs.bucket_name }} --recursive || true
 
       - name: Delete ECR Images
         run: |
@@ -50,9 +64,7 @@ jobs:
 
       - name: Terraform Destroy
         working-directory: ./terraform
-        run: |
-          terraform destroy -auto-approve \
-            -var="s3_bucket_name=${{ secrets.S3_BUCKET_NAME }}"
+        run: terraform destroy -auto-approve
 
       - name: Create Destruction Summary
         if: always()

@@ -30,9 +30,27 @@ variable "project_name" {
 }
 
 variable "s3_bucket_name" {
-  description = "S3 bucket for outputs"
+  description = "S3 bucket for outputs (leave empty for auto-generated)"
   type        = string
+  default     = ""
 }
+
+# Auto-generate unique bucket name if not provided
+locals {
+  # Get AWS account ID
+  account_id = data.aws_caller_identity.current.account_id
+  
+  # Generate unique bucket name: ai-music-gen-{account_id}-{random}
+  bucket_name = var.s3_bucket_name != "" ? var.s3_bucket_name : "ai-music-gen-${local.account_id}-${random_id.bucket_suffix.hex}"
+}
+
+# Random suffix for bucket name
+resource "random_id" "bucket_suffix" {
+  byte_length = 4
+}
+
+# Get current AWS account info
+data "aws_caller_identity" "current" {}
 
 variable "ecr_repository_name" {
   description = "ECR repository name"
@@ -42,7 +60,7 @@ variable "ecr_repository_name" {
 
 # S3 Bucket for outputs
 resource "aws_s3_bucket" "output_bucket" {
-  bucket = var.s3_bucket_name
+  bucket = local.bucket_name
   
   tags = {
     Name    = "${var.project_name}-output"

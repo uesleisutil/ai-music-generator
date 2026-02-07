@@ -51,9 +51,7 @@ jobs:
         id: tf-plan
         working-directory: ./terraform
         run: |
-          terraform plan -detailed-exitcode -no-color -out=tfplan \
-            -var="s3_bucket_name=${{ secrets.S3_BUCKET_NAME }}" \
-            || export exitcode=$?
+          terraform plan -detailed-exitcode -no-color -out=tfplan || export exitcode=$?
           
           echo "exitcode=$exitcode" >> $GITHUB_OUTPUT
           
@@ -130,6 +128,14 @@ jobs:
         working-directory: ./terraform
         run: terraform apply -auto-approve tfplan
 
+      - name: Get S3 Bucket Name
+        id: get-bucket
+        working-directory: ./terraform
+        run: |
+          BUCKET_NAME=$(terraform output -raw s3_bucket_name)
+          echo "bucket_name=$BUCKET_NAME" >> $GITHUB_OUTPUT
+          echo "S3 Bucket: $BUCKET_NAME"
+
   build-and-push:
     name: Build and Push Docker Image
     needs: [terraform-apply]
@@ -196,6 +202,33 @@ jobs:
     if: always()
     
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+          terraform_wrapper: false
+
+      - name: Terraform Init
+        working-directory: ./terraform
+        run: terraform init
+
+      - name: Get Outputs
+        id: outputs
+        working-directory: ./terraform
+        run: |
+          BUCKET_NAME=$(terraform output -raw s3_bucket_name 2>/dev/null || echo "not-deployed")
+          echo "bucket_name=$BUCKET_NAME" >> $GITHUB_OUTPUT
+
       - name: Create Deployment Summary
         uses: actions/github-script@v7
         with:
@@ -203,6 +236,7 @@ jobs:
             const terraformPlan = '${{ needs.terraform-plan.result }}';
             const terraformApply = '${{ needs.terraform-apply.result }}';
             const buildPush = '${{ needs.build-and-push.result }}';
+            const bucketName = '${{ steps.outputs.outputs.bucket_name }}';
             
             const summary = `## 🚀 Deployment Summary
             
@@ -217,6 +251,7 @@ jobs:
             - **Branch**: ${{ github.ref_name }}
             - **Actor**: @${{ github.actor }}
             - **Workflow**: ${{ github.workflow }}
+            - **S3 Bucket**: \`${bucketName}\`
             
             ### Next Steps
             Submit a job to test the deployment:
@@ -225,9 +260,12 @@ jobs:
               --prompt "cozy lofi coffee shop music" \\
               --duration 60 \\
               --preset balanced \\
-              --output-bucket ${{ secrets.S3_BUCKET_NAME }} \\
+              --output-bucket ${bucketName} \\
               --wait
             \`\`\`
+            
+            Or use GitHub Actions:
+            - Go to **Actions** > **Test Deployment** > **Run workflow**
             `;
             
             core.summary.addRaw(summary).write();

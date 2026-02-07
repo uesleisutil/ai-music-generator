@@ -38,15 +38,18 @@ cd ai-music-generator
 
 ### Step 2: Configure GitHub Secrets
 
-Go to **Settings** > **Secrets and variables** > **Actions** and add:
+Go to **Settings** > **Secrets and variables** > **Actions** and add **only 2 secrets**:
 
-| Secret Name | Value | Example |
-|-------------|-------|---------|
-| `AWS_ACCESS_KEY_ID` | Your AWS access key | `AKIAIOSFODNN7EXAMPLE` |
-| `AWS_SECRET_ACCESS_KEY` | Your AWS secret key | `wJalrXUtnFEMI/K7MDENG/...` |
-| `S3_BUCKET_NAME` | Unique bucket name | `your-name-ai-music-2026` |
+| Secret Name | Value | Where to Get |
+|-------------|-------|--------------|
+| `AWS_ACCESS_KEY_ID` | Your AWS access key | IAM Console > Users > Security credentials > Create access key |
+| `AWS_SECRET_ACCESS_KEY` | Your AWS secret key | Same as above (copy immediately!) |
 
-📖 **Detailed guide**: [docs/GITHUB_ACTIONS_SETUP.md](docs/GITHUB_ACTIONS_SETUP.md)
+**That's it!** No need for `S3_BUCKET_NAME` - it's auto-generated! 🎉
+
+The bucket will be created automatically as: `ai-music-gen-{your-account-id}-{random}`
+
+📖 **Quick guide**: [QUICK_SETUP.md](QUICK_SETUP.md) - Just 5 minutes!
 
 ### Step 3: Deploy Automatically
 

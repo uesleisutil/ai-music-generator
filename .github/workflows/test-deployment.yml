@@ -50,6 +50,17 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Get S3 Bucket Name
+        id: get-bucket
+        run: |
+          # Get bucket name from Terraform output
+          cd terraform
+          terraform init
+          BUCKET_NAME=$(terraform output -raw s3_bucket_name)
+          echo "bucket_name=$BUCKET_NAME" >> $GITHUB_OUTPUT
+          echo "Using S3 bucket: $BUCKET_NAME"
+          cd ..
+
       - name: Submit job to AWS Batch
         id: submit-job
         run: |
@@ -57,7 +68,7 @@ jobs:
             --prompt "${{ github.event.inputs.prompt }}" \
             --duration ${{ github.event.inputs.duration }} \
             --preset ${{ github.event.inputs.preset }} \
-            --output-bucket ${{ secrets.S3_BUCKET_NAME }} \
+            --output-bucket ${{ steps.get-bucket.outputs.bucket_name }} \
             --wait > job_output.txt 2>&1
           
           # Extract job ID from output
@@ -70,7 +81,7 @@ jobs:
         if: success()
         run: |
           mkdir -p test-results
-          aws s3 sync s3://${{ secrets.S3_BUCKET_NAME }}/output/${{ steps.submit-job.outputs.job_id }}/ ./test-results/
+          aws s3 sync s3://${{ steps.get-bucket.outputs.bucket_name }}/output/${{ steps.submit-job.outputs.job_id }}/ ./test-results/
 
       - name: Upload test results
         if: success()
@@ -101,7 +112,7 @@ jobs:
             \`\`\`
             
             ### Download Results
-            Results available at: \`s3://${{ secrets.S3_BUCKET_NAME }}/output/${{ steps.submit-job.outputs.job_id }}/\`
+            Results available at: \`s3://${{ steps.get-bucket.outputs.bucket_name }}/output/${{ steps.submit-job.outputs.job_id }}/\`
             
             Or download from GitHub Actions artifacts above.
             `;
