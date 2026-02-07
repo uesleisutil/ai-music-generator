@@ -15,19 +15,21 @@ from googleapiclient.http import MediaFileUpload
 
 SCOPES = ['https://www.googleapis.com/auth/youtube.upload']
 
+
 def load_config():
     with open('config.yaml', 'r') as f:
         return yaml.safe_load(f)
 
+
 def get_authenticated_service():
     """Autentica com a API do YouTube"""
     creds = None
-    
+
     # Token salvo de autenticações anteriores
     if os.path.exists('token.pickle'):
         with open('token.pickle', 'rb') as token:
             creds = pickle.load(token)
-    
+
     # Se não há credenciais válidas, fazer login
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
@@ -36,21 +38,22 @@ def get_authenticated_service():
             flow = InstalledAppFlow.from_client_secrets_file(
                 'client_secrets.json', SCOPES)
             creds = flow.run_local_server(port=0)
-        
+
         # Salvar credenciais para próxima vez
         with open('token.pickle', 'wb') as token:
             pickle.dump(creds, token)
-    
+
     return build('youtube', 'v3', credentials=creds)
+
 
 def upload_video(video_path, title, description="", tags=None, category="10", privacy="public"):
     """Faz upload do vídeo para o YouTube"""
-    
+
     print(f"📤 Iniciando upload para YouTube...")
     print(f"   Título: {title}")
-    
+
     youtube = get_authenticated_service()
-    
+
     body = {
         'snippet': {
             'title': title,
@@ -63,28 +66,29 @@ def upload_video(video_path, title, description="", tags=None, category="10", pr
             'selfDeclaredMadeForKids': False
         }
     }
-    
+
     media = MediaFileUpload(video_path, chunksize=-1, resumable=True)
-    
+
     request = youtube.videos().insert(
         part=','.join(body.keys()),
         body=body,
         media_body=media
     )
-    
+
     response = None
     while response is None:
         status, response = request.next_chunk()
         if status:
             print(f"   Progresso: {int(status.progress() * 100)}%")
-    
+
     video_id = response['id']
     video_url = f"https://www.youtube.com/watch?v={video_id}"
-    
+
     print(f"✅ Upload concluído!")
     print(f"🔗 URL: {video_url}")
-    
+
     return video_url
+
 
 def main():
     parser = argparse.ArgumentParser(description='Upload de vídeo para YouTube')
@@ -93,11 +97,11 @@ def main():
     parser.add_argument('--description', type=str, default='', help='Descrição do vídeo')
     parser.add_argument('--tags', type=str, help='Tags separadas por vírgula')
     parser.add_argument('--privacy', type=str, default='public', choices=['public', 'private', 'unlisted'])
-    
+
     args = parser.parse_args()
-    
+
     tags = args.tags.split(',') if args.tags else []
-    
+
     upload_video(
         args.video,
         args.title,
@@ -105,6 +109,7 @@ def main():
         tags,
         privacy=args.privacy
     )
+
 
 if __name__ == "__main__":
     main()

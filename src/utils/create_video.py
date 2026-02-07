@@ -9,14 +9,14 @@ import os
 
 def create_video(audio_path, image_path, output_path="output/video.mp4"):
     """Combina áudio e imagem em um vídeo"""
-    
+
     print(f"🎬 Criando vídeo...")
     print(f"   Áudio: {audio_path}")
     print(f"   Imagem: {image_path}")
-    
+
     # Criar diretório de saída
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
-    
+
     # Comando FFmpeg para criar vídeo
     command = [
         'ffmpeg',
@@ -32,7 +32,7 @@ def create_video(audio_path, image_path, output_path="output/video.mp4"):
         '-y',  # Sobrescrever arquivo existente
         output_path
     ]
-    
+
     try:
         subprocess.run(command, check=True, capture_output=True)
         print(f"✅ Vídeo criado com sucesso: {output_path}")
@@ -46,9 +46,9 @@ def main():
     parser.add_argument('--audio', type=str, required=True, help='Caminho do arquivo de áudio')
     parser.add_argument('--image', type=str, required=True, help='Caminho da imagem')
     parser.add_argument('--output', type=str, default='output/video.mp4', help='Caminho de saída')
-    
+
     args = parser.parse_args()
-    
+
     create_video(args.audio, args.image, args.output)
 
 if __name__ == "__main__":
