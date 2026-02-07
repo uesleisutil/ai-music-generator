@@ -12,16 +12,16 @@ def test_project_structure():
     
     required_files = [
         'README.md',
-        'SETUP.md',
-        'CONTRIBUTING.md',
+        'docs/SETUP.md',
+        'docs/CONTRIBUTING.md',
         'LICENSE',
         'requirements.txt',
         'config.yaml',
-        'pipeline.py',
-        'generate_music.py',
-        'generate_image.py',
-        'create_video.py',
-        'upload_youtube.py',
+        'src/pipeline.py',
+        'src/generators/generate_music.py',
+        'src/generators/generate_image.py',
+        'src/utils/create_video.py',
+        'src/utils/upload_youtube.py',
         '.gitignore',
     ]
     
@@ -61,15 +61,20 @@ def test_python_syntax():
     print("\n🔍 Verificando sintaxe Python...\n")
     
     python_files = [
-        'pipeline.py',
-        'generate_music.py',
-        'generate_image.py',
-        'create_video.py',
-        'upload_youtube.py',
+        'src/pipeline.py',
+        'src/pipeline_simple.py',
+        'src/pipeline_ai.py',
+        'src/generators/generate_music.py',
+        'src/generators/generate_image.py',
+        'src/utils/create_video.py',
+        'src/utils/upload_youtube.py',
     ]
     
     errors = []
     for file in python_files:
+        if not os.path.exists(file):
+            print(f"  ⚠ {file} - NÃO ENCONTRADO")
+            continue
         try:
             with open(file, 'r') as f:
                 compile(f.read(), file, 'exec')

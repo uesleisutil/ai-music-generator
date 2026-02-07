@@ -5,10 +5,14 @@ Pipeline simplificado sem IA (para testes rápidos)
 
 import argparse
 import os
-from generate_music_simple import generate_simple_music
-from generate_image_simple import generate_simple_image
-from create_video import create_video
-from upload_youtube import upload_video
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from src.generators.generate_music_simple import generate_simple_music
+from src.generators.generate_image_simple import generate_simple_image
+from src.utils.create_video import create_video
+from src.utils.upload_youtube import upload_video
 
 def run_simple_pipeline(prompt, duration=30, title=None, description="", tags=None, privacy="public", skip_upload=False):
     """Executa o pipeline simplificado"""

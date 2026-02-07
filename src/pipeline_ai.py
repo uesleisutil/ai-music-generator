@@ -6,10 +6,14 @@ Pipeline completo com múltiplos modelos de IA
 import argparse
 import os
 import yaml
-from generate_music_ai import generate_music_ai
-from generate_image_ai import generate_image_ai
-from create_video import create_video
-from upload_youtube import upload_video
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from src.generators.generate_music_ai import generate_music_ai
+from src.generators.generate_image_ai import generate_image_ai
+from src.utils.create_video import create_video
+from src.utils.upload_youtube import upload_video
 
 def load_models_config():
     with open('models_config.yaml', 'r') as f:
