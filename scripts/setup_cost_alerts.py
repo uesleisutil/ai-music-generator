@@ -73,10 +73,6 @@ def create_budget(account_id, topic_arn, threshold):
         },
         'TimeUnit': 'MONTHLY',
         'BudgetType': 'COST',
-        'CostFilters': {
-            'TagKey': ['Project'],
-            'TagValue': ['ai-music-generator']
-        },
         'CostTypes': {
             'IncludeTax': True,
             'IncludeSubscription': True,
