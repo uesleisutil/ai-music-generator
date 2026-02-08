@@ -11,7 +11,7 @@ import torch
 
 
 def load_models_config():
-    with open('models_config.yaml', 'r') as f:
+    with open("models_config.yaml", "r") as f:
         return yaml.safe_load(f)
 
 
@@ -78,8 +78,7 @@ def generate_with_stable_diffusion(model_id, prompt, output_path, width=1280, he
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
     pipe = StableDiffusionPipeline.from_pretrained(
-        model_id,
-        torch_dtype=torch.float16 if device == "cuda" else torch.float32
+        model_id, torch_dtype=torch.float16 if device == "cuda" else torch.float32
     )
     pipe = pipe.to(device)
 
@@ -99,7 +98,7 @@ def generate_with_stable_diffusion(model_id, prompt, output_path, width=1280, he
         num_inference_steps=50,  # Aumentado para melhor quality
         guidance_scale=8.5,  # Aumentado para seguir melhor o prompt
         width=width,
-        height=height
+        height=height,
     ).images[0]
 
     image.save(output_path)
@@ -114,8 +113,7 @@ def generate_with_sdxl(model_id, prompt, output_path, width=1280, height=720):
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
     pipe = StableDiffusionXLPipeline.from_pretrained(
-        model_id,
-        torch_dtype=torch.float16 if device == "cuda" else torch.float32
+        model_id, torch_dtype=torch.float16 if device == "cuda" else torch.float32
     )
     pipe = pipe.to(device)
 
@@ -132,7 +130,7 @@ def generate_with_sdxl(model_id, prompt, output_path, width=1280, height=720):
         num_inference_steps=50,  # Aumentado
         guidance_scale=8.5,  # Aumentado
         width=width,
-        height=height
+        height=height,
     ).images[0]
 
     image.save(output_path)
@@ -148,13 +146,11 @@ def generate_with_kandinsky(model_id, prompt, output_path, width=1280, height=72
 
     # Kandinsky usa dois estágios
     prior = KandinskyV22PriorPipeline.from_pretrained(
-        "kandinsky-community/kandinsky-2-2-prior",
-        torch_dtype=torch.float16 if device == "cuda" else torch.float32
+        "kandinsky-community/kandinsky-2-2-prior", torch_dtype=torch.float16 if device == "cuda" else torch.float32
     ).to(device)
 
     pipe = KandinskyV22Pipeline.from_pretrained(
-        model_id,
-        torch_dtype=torch.float16 if device == "cuda" else torch.float32
+        model_id, torch_dtype=torch.float16 if device == "cuda" else torch.float32
     ).to(device)
 
     print(f"🖼️  Generating lofi style image: '{prompt}'...")
@@ -171,7 +167,7 @@ def generate_with_kandinsky(model_id, prompt, output_path, width=1280, height=72
         negative_image_embeds=negative_embeds,
         height=height,
         width=width,
-        num_inference_steps=50
+        num_inference_steps=50,
     ).images[0]
 
     image.save(output_path)
@@ -183,16 +179,16 @@ def generate_image_ai(prompt, output_path="output/cover.png", model_key="sd-1-5"
 
     models_config = load_models_config()
 
-    if model_key not in models_config['image_models']:
+    if model_key not in models_config["image_models"]:
         print(f"❌ Model '{model_key}' not found!")
-        print(f"💡 Use: python scripts/list_models.py to see available models")
+        print("💡 Use: python scripts/list_models.py to see available models")
         return None
 
-    model_info = models_config['image_models'][model_key]
-    model_id = model_info['model_id']
+    model_info = models_config["image_models"][model_key]
+    model_id = model_info["model_id"]
 
     print(f"\n{'='*60}")
-    print(f"🎨 Generating Image with AI")
+    print("🎨 Generating Image with AI")
     print(f"{'='*60}")
     print(f"Model: {model_info['name']}")
     print(f"Quality: {model_info['quality']}")
@@ -215,8 +211,8 @@ def generate_image_ai(prompt, output_path="output/cover.png", model_key="sd-1-5"
             # Fallback to default Stable Diffusion
             return generate_with_stable_diffusion(model_id, prompt, output_path, width, height)
     except ImportError as e:
-        print(f"❌ Error: Required libraries not installed")
-        print(f"💡 Run: pip install -r requirements-full.txt")
+        print("❌ Error: Required libraries not installed")
+        print("💡 Run: pip install -r requirements-full.txt")
         print(f"Error: {e}")
         return None
     except Exception as e:
@@ -225,12 +221,12 @@ def generate_image_ai(prompt, output_path="output/cover.png", model_key="sd-1-5"
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Generate image with AI (multiple models)')
-    parser.add_argument('--prompt', type=str, required=True, help='Image description')
-    parser.add_argument('--output', type=str, default='output/cover.png', help='Output path')
-    parser.add_argument('--model', type=str, default='sd-1-5', help='Model a usar (see list_models.py)')
-    parser.add_argument('--width', type=int, default=1280, help='Largura da image')
-    parser.add_argument('--height', type=int, default=720, help='Altura da image')
+    parser = argparse.ArgumentParser(description="Generate image with AI (multiple models)")
+    parser.add_argument("--prompt", type=str, required=True, help="Image description")
+    parser.add_argument("--output", type=str, default="output/cover.png", help="Output path")
+    parser.add_argument("--model", type=str, default="sd-1-5", help="Model a usar (see list_models.py)")
+    parser.add_argument("--width", type=int, default=1280, help="Largura da image")
+    parser.add_argument("--height", type=int, default=720, help="Altura da image")
 
     args = parser.parse_args()
 
@@ -239,7 +235,7 @@ def main():
     if result:
         print(f"\n✅ Image generated successfully: {result}")
     else:
-        print(f"\n❌ Failed to generate image")
+        print("\n❌ Failed to generate image")
 
 
 if __name__ == "__main__":
