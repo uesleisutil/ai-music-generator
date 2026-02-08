@@ -176,8 +176,32 @@ ai-music-generator/
 ### Prerequisites
 
 - AWS Account
-- GitHub Account
+- GitHub Account  
+- **GPU Quota** - Request GPU instance quota (see below)
 - 10 minutes
+
+### ⚠️ Important: GPU Quota Requirement
+
+**Before deploying**, you need to request GPU instance quota from AWS:
+
+1. **Check your current quota**:
+   ```bash
+   python scripts/request_gpu_quota.sh
+   ```
+
+2. **Request quota increase**:
+   - Go to [AWS Service Quotas Console](https://console.aws.amazon.com/servicequotas/home/services/ec2/quotas/L-DB2E81BA)
+   - Click "Request quota increase"
+   - Request: **8 vCPUs** (allows 1x g4dn.2xlarge or 2x g4dn.xlarge)
+   - Justification: "Need GPU instances for AI/ML workloads (music and video generation)"
+   - Wait for approval (usually 24-48 hours)
+
+3. **Why is this needed?**
+   - New AWS accounts have 0 GPU quota by default
+   - GPU instances (g4dn.xlarge) are required for fast AI model inference
+   - Without quota, jobs will stay in "RUNNABLE" state indefinitely
+
+**Cost**: g4dn.xlarge On-Demand ~$0.526/hour (~$0.01-0.02 per 60s video)
 
 ### 1. Fork & Clone
 
