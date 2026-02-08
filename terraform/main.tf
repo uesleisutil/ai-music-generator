@@ -262,16 +262,14 @@ resource "aws_launch_template" "batch_lt" {
   }
 }
 
-# Batch Compute Environment (Spot instances for cost savings)
-resource "aws_batch_compute_environment" "gpu_spot" {
-  compute_environment_name = "${var.project_name}-gpu-spot"
+# Batch Compute Environment (On-Demand for reliability)
+resource "aws_batch_compute_environment" "gpu_ondemand" {
+  compute_environment_name = "${var.project_name}-gpu-ondemand"
   type                     = "MANAGED"
   service_role             = aws_iam_role.batch_service_role.arn
   
   compute_resources {
-    type                = "SPOT"
-    allocation_strategy = "SPOT_CAPACITY_OPTIMIZED"
-    bid_percentage      = 100
+    type                = "EC2"  # Changed from SPOT to EC2 (On-Demand)
     
     instance_role = aws_iam_instance_profile.ecs_instance_profile.arn
     instance_type = [
@@ -370,7 +368,7 @@ resource "aws_batch_job_queue" "gpu_queue" {
   
   compute_environment_order {
     order               = 1
-    compute_environment = aws_batch_compute_environment.gpu_spot.arn
+    compute_environment = aws_batch_compute_environment.gpu_ondemand.arn
   }
   
   tags = {
