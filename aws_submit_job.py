@@ -41,7 +41,9 @@ def submit_job(
     print(f"Duration: {duration}s")
     print(f"Preset: {preset}")
     print(f"Resolution: {resolution.upper()}")
-    print(f"Image Generator: {'AWS Bedrock (' + bedrock_model.upper() + ')' if use_bedrock else 'Local Models'}")
+    print(
+        f"Image Generator: {'AWS Bedrock (' + bedrock_model.upper() + ')' if use_bedrock else 'Local Models'}"
+    )
     print(f"Output: s3://{output_bucket}/{output_prefix}/{job_id}/")
     print("=" * 60 + "\n")
 
@@ -83,7 +85,9 @@ def submit_job(
 
         if wait:
             print("⏳ Waiting for job to complete...")
-            print("   (This may take 5-15 minutes for first run - GPU provisioning + Docker image download)")
+            print(
+                "   (This may take 5-15 minutes for first run - GPU provisioning + Docker image download)"
+            )
             print()
 
             last_status = None
@@ -104,15 +108,24 @@ def submit_job(
                         print(f"   Reason: {status_reason}")
 
                     if status == "RUNNABLE":
-                        print("   ⏳ Waiting for GPU instance to be provisioned (this can take 3-5 minutes)...")
+                        print(
+                            "   ⏳ Waiting for GPU instance to be provisioned (this can take 3-5 minutes)..."
+                        )
                     elif status == "STARTING":
-                        print("   🚀 GPU instance ready, downloading Docker image (~2-3 GB)...")
+                        print(
+                            "   🚀 GPU instance ready, downloading Docker image (~2-3 GB)..."
+                        )
                     elif status == "RUNNING":
                         print("   🎵 Generating music and video...")
                         # Try to get container info
-                        if "container" in job_desc and "logStreamName" in job_desc["container"]:
+                        if (
+                            "container" in job_desc
+                            and "logStreamName" in job_desc["container"]
+                        ):
                             log_stream = job_desc["container"]["logStreamName"]
-                            print(f"   📋 Logs: /aws/batch/ai-music-generator/{log_stream}")
+                            print(
+                                f"   📋 Logs: /aws/batch/ai-music-generator/{log_stream}"
+                            )
 
                     last_status = status
                 else:
@@ -134,7 +147,9 @@ def submit_job(
                 # List output files
                 s3 = boto3.client("s3")
                 try:
-                    objects = s3.list_objects_v2(Bucket=output_bucket, Prefix=f"{output_prefix}/{job_id}/")
+                    objects = s3.list_objects_v2(
+                        Bucket=output_bucket, Prefix=f"{output_prefix}/{job_id}/"
+                    )
 
                     if "Contents" in objects:
                         print("   Files:")
@@ -189,7 +204,9 @@ def submit_job(
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Submit AI Music Generation job to AWS Batch")
+    parser = argparse.ArgumentParser(
+        description="Submit AI Music Generation job to AWS Batch"
+    )
     parser.add_argument("--prompt", type=str, required=True, help="Music description")
     parser.add_argument("--duration", type=int, default=30, help="Duration in seconds")
     parser.add_argument(
@@ -215,15 +232,27 @@ def main():
     parser.add_argument(
         "--bedrock-model",
         type=str,
-        default="sdxl",
-        choices=["sdxl", "titan"],
-        help="Bedrock model: sdxl (Stable Diffusion XL) or titan (Amazon Titan)",
+        default="nova",
+        choices=["nova", "titan", "sdxl"],
+        help="Bedrock model: nova (Amazon Nova Canvas - recommended), titan (Amazon Titan v2), or sdxl (deprecated)",
     )
-    parser.add_argument("--output-bucket", type=str, required=True, help="S3 bucket for output")
-    parser.add_argument("--output-prefix", type=str, default="output", help="S3 prefix for output")
-    parser.add_argument("--job-queue", type=str, default="ai-music-generator-queue", help="AWS Batch job queue name")
     parser.add_argument(
-        "--job-definition", type=str, default="ai-music-generator-job", help="AWS Batch job definition name"
+        "--output-bucket", type=str, required=True, help="S3 bucket for output"
+    )
+    parser.add_argument(
+        "--output-prefix", type=str, default="output", help="S3 prefix for output"
+    )
+    parser.add_argument(
+        "--job-queue",
+        type=str,
+        default="ai-music-generator-queue",
+        help="AWS Batch job queue name",
+    )
+    parser.add_argument(
+        "--job-definition",
+        type=str,
+        default="ai-music-generator-job",
+        help="AWS Batch job definition name",
     )
     parser.add_argument("--wait", action="store_true", help="Wait for job to complete")
 

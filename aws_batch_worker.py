@@ -45,7 +45,9 @@ def process_job(job_config):
     duration = job_config.get("duration", 30)
     preset = job_config.get("preset", "balanced")
     resolution = job_config.get("resolution", "hd")
-    use_bedrock = job_config.get("use_bedrock", True)  # Default to Bedrock for better quality
+    use_bedrock = job_config.get(
+        "use_bedrock", True
+    )  # Default to Bedrock for better quality
     bedrock_model = job_config.get("bedrock_model", "sdxl")
     output_bucket = job_config["output_bucket"]
     output_prefix = job_config.get("output_prefix", "output")
@@ -55,7 +57,9 @@ def process_job(job_config):
     print(f"⏱️  Duration: {duration}s")
     print(f"🎯 Preset: {preset}")
     print(f"📐 Resolution: {resolution.upper()}")
-    print(f"☁️  Image Generator: {'AWS Bedrock (' + bedrock_model.upper() + ')' if use_bedrock else 'Local Models'}")
+    print(
+        f"☁️  Image Generator: {'AWS Bedrock (' + bedrock_model.upper() + ')' if use_bedrock else 'Local Models'}"
+    )
     print(f"📦 Output: s3://{output_bucket}/{output_prefix}/{job_id}/")
     print()
 
@@ -163,23 +167,40 @@ def process_job(job_config):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="AWS Batch Worker for AI Music Generation")
+    parser = argparse.ArgumentParser(
+        description="AWS Batch Worker for AI Music Generation"
+    )
     parser.add_argument("--job-config", type=str, help="Path to job config JSON file")
-    parser.add_argument("--job-config-s3", type=str, help="S3 path to job config (s3://bucket/key)")
+    parser.add_argument(
+        "--job-config-s3", type=str, help="S3 path to job config (s3://bucket/key)"
+    )
     parser.add_argument("--prompt", type=str, help="Music prompt")
     parser.add_argument("--duration", type=int, default=30, help="Duration in seconds")
     parser.add_argument("--preset", type=str, default="balanced", help="Quality preset")
     parser.add_argument(
-        "--resolution", type=str, default="hd", choices=["hd", "fhd", "2k", "4k", "youtube"], help="Video resolution"
+        "--resolution",
+        type=str,
+        default="hd",
+        choices=["hd", "fhd", "2k", "4k", "youtube"],
+        help="Video resolution",
     )
     parser.add_argument(
-        "--use-bedrock", action="store_true", default=True, help="Use AWS Bedrock for image generation (default: True)"
+        "--use-bedrock",
+        action="store_true",
+        default=True,
+        help="Use AWS Bedrock for image generation (default: True)",
     )
     parser.add_argument(
-        "--bedrock-model", type=str, default="sdxl", choices=["sdxl", "titan"], help="Bedrock model: sdxl or titan"
+        "--bedrock-model",
+        type=str,
+        default="nova",
+        choices=["nova", "titan", "sdxl"],
+        help="Bedrock model: nova, titan, or sdxl (deprecated)",
     )
     parser.add_argument("--output-bucket", type=str, help="S3 bucket for output")
-    parser.add_argument("--output-prefix", type=str, default="output", help="S3 prefix for output")
+    parser.add_argument(
+        "--output-prefix", type=str, default="output", help="S3 prefix for output"
+    )
 
     args = parser.parse_args()
 
@@ -204,7 +225,9 @@ def main():
             sys.exit(1)
 
         job_config = {
-            "job_id": os.environ.get("AWS_BATCH_JOB_ID", datetime.now().strftime("%Y%m%d_%H%M%S")),
+            "job_id": os.environ.get(
+                "AWS_BATCH_JOB_ID", datetime.now().strftime("%Y%m%d_%H%M%S")
+            ),
             "prompt": args.prompt,
             "duration": args.duration,
             "preset": args.preset,

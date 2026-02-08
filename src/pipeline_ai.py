@@ -101,7 +101,9 @@ def run_pipeline_ai(
     # 2. Generate image
     print("\n📍 STEP 2/4: Generating cover image with AI...")
     if use_bedrock:
-        image_path = generate_image_bedrock(prompt, image_output, bedrock_model, width, height)
+        image_path = generate_image_bedrock(
+            prompt, image_output, bedrock_model, width, height
+        )
     else:
         image_path = generate_image_ai(prompt, image_output, image_model, width, height)
 
@@ -118,11 +120,16 @@ def run_pipeline_ai(
     if not skip_upload:
         print("\n📍 STEP 4/4: Uploading to YouTube...")
         video_title = title or f"{prompt.title()}"
-        video_description = description or f"Music generated por IA: {prompt}\n\nModels: {music_model} + {image_model}"
+        video_description = (
+            description
+            or f"Music generated por IA: {prompt}\n\nModels: {music_model} + {image_model}"
+        )
         video_tags = tags or ["ai music", "ai generated", "music"]
 
         try:
-            video_url = upload_video(video_path, video_title, video_description, video_tags, privacy=privacy)
+            video_url = upload_video(
+                video_path, video_title, video_description, video_tags, privacy=privacy
+            )
         except FileNotFoundError:
             print("⚠️  client_secrets.json not found")
             print("   Skipping upload. Veja SETUP.md to configure YouTube API")
@@ -143,18 +150,34 @@ def run_pipeline_ai(
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Complete pipeline with AI (multiple models)")
+    parser = argparse.ArgumentParser(
+        description="Complete pipeline with AI (multiple models)"
+    )
     parser.add_argument("--prompt", type=str, required=True, help="Music description")
     parser.add_argument("--duration", type=int, default=30, help="Duration in seconds")
     parser.add_argument("--title", type=str, help="Video title")
     parser.add_argument("--description", type=str, default="", help="Video description")
     parser.add_argument("--tags", type=str, help="Comma-separated tags")
-    parser.add_argument("--privacy", type=str, default="public", choices=["public", "private", "unlisted"])
-    parser.add_argument("--skip-upload", action="store_true", help="Skip YouTube upload")
-    parser.add_argument("--music-model", type=str, help="Model de music (see list_models.py)")
-    parser.add_argument("--image-model", type=str, help="Model de image (see list_models.py)")
     parser.add_argument(
-        "--preset", type=str, choices=["quick", "balanced", "quality", "experimental"], help="Model preset"
+        "--privacy",
+        type=str,
+        default="public",
+        choices=["public", "private", "unlisted"],
+    )
+    parser.add_argument(
+        "--skip-upload", action="store_true", help="Skip YouTube upload"
+    )
+    parser.add_argument(
+        "--music-model", type=str, help="Model de music (see list_models.py)"
+    )
+    parser.add_argument(
+        "--image-model", type=str, help="Model de image (see list_models.py)"
+    )
+    parser.add_argument(
+        "--preset",
+        type=str,
+        choices=["quick", "balanced", "quality", "experimental"],
+        help="Model preset",
     )
     parser.add_argument(
         "--resolution",
@@ -164,14 +187,16 @@ def main():
         help="Video resolution: hd (720p), fhd (1080p), 2k (1440p), 4k (2160p), youtube (1080p)",
     )
     parser.add_argument(
-        "--use-bedrock", action="store_true", help="Use AWS Bedrock for image generation (better quality)"
+        "--use-bedrock",
+        action="store_true",
+        help="Use AWS Bedrock for image generation (better quality)",
     )
     parser.add_argument(
         "--bedrock-model",
         type=str,
-        default="sdxl",
-        choices=["sdxl", "titan"],
-        help="Bedrock model: sdxl (Stable Diffusion XL) or titan (Amazon Titan)",
+        default="nova",
+        choices=["nova", "titan", "sdxl"],
+        help="Bedrock model: nova (Amazon Nova Canvas - recommended), titan (Amazon Titan v2), or sdxl (deprecated)",
     )
 
     args = parser.parse_args()
