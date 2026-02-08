@@ -144,6 +144,8 @@ resource "aws_iam_role_policy" "batch_job_bedrock_policy" {
           "bedrock:InvokeModelWithResponseStream"
         ]
         Resource = [
+          "arn:aws:bedrock:*::foundation-model/amazon.nova-canvas-v1:0",
+          "arn:aws:bedrock:*::foundation-model/amazon.titan-image-generator-v2:0",
           "arn:aws:bedrock:*::foundation-model/stability.stable-diffusion-xl-v1",
           "arn:aws:bedrock:*::foundation-model/amazon.titan-image-generator-v1"
         ]
