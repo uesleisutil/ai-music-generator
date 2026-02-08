@@ -6,7 +6,7 @@ set -e
 
 AWS_PROFILE=${AWS_PROFILE:-b3tr}
 AWS_REGION=${AWS_REGION:-us-east-1}
-COMPUTE_ENV="ai-music-generator-gpu-ondemand"
+COMPUTE_ENV="ai-music-generator-gpu-spot"
 DURATION_MINUTES=${1:-60}  # Default 60 minutes
 
 echo "🔥 Warming up GPU instance..."

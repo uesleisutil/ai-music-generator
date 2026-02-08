@@ -49,8 +49,8 @@ else
 fi
 
 # Compute Environment
-if aws batch describe-compute-environments --compute-environments ai-music-generator-gpu-ondemand --region $AWS_REGION --profile $AWS_PROFILE &>/dev/null; then
-  CE_STATUS=$(aws batch describe-compute-environments --compute-environments ai-music-generator-gpu-ondemand --region $AWS_REGION --profile $AWS_PROFILE --query 'computeEnvironments[0].state' --output text)
+if aws batch describe-compute-environments --compute-environments ai-music-generator-gpu-spot --region $AWS_REGION --profile $AWS_PROFILE &>/dev/null; then
+  CE_STATUS=$(aws batch describe-compute-environments --compute-environments ai-music-generator-gpu-spot --region $AWS_REGION --profile $AWS_PROFILE --query 'computeEnvironments[0].state' --output text)
   echo "   ✅ Compute Environment: $CE_STATUS"
 else
   echo "   ❌ Compute Environment: Not found"

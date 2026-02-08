@@ -13,7 +13,7 @@ from datetime import datetime, timedelta
 def warm_up_gpu(duration_minutes=60, profile='b3tr', region='us-east-1'):
     """Warm up GPU instance and schedule scale down"""
     
-    compute_env = 'ai-music-generator-gpu-ondemand'
+    compute_env = 'ai-music-generator-gpu-spot'
     desired_vcpus = 4  # 1 x g4dn.xlarge
     
     print("🔥 Warming up GPU instance...")
